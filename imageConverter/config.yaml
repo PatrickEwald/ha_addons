@@ -2,6 +2,18 @@ name: "Hello world"
 description: "My first real add-on!"
 version: "1.1.0"
 slug: "hello_world"
+options:
+  beer: true
+  wine: true
+  liquor: false
+  name: "world"
+  year: 2017
+schema:
+  beer: bool
+  wine: bool
+  liquor: bool
+  name: str
+  year: int
 init: false
 arch:
   - aarch64
