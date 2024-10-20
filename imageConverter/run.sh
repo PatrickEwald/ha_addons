@@ -54,7 +54,7 @@ done
 
 echo "Konvertierung abgeschlossen."
 
-# Erstelle ein MP4-Video aus den WebP-Dateien
-echo "Erstelle MP4-Video aus den WebP-Dateien..."
-ffmpeg -y -framerate 25 -i "$directory/index%d.webp" -vf reverse -c:v libx264 -r 30 -pix_fmt yuv420p "$directory/output.mp4"
-echo "MP4-Video erstellt: output.mp4"
+# Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
+echo "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
+ffmpeg -y -framerate 25 -i "$directory/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$directory/output_reversed.mp4"
+echo "Rückwärtslaufendes MP4-Video erstellt: output_reversed.mp4"
