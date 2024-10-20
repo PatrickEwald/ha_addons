@@ -5,7 +5,7 @@ set -x  # Zeigt alle ausgeführten Befehle an
 set -e  # Beende das Skript bei Fehlern
 
 # Verzeichnis, in dem die JPG- und WebP-Dateien liegen
-directory="/media"
+directory="/media/imageToMovie"
 
 # Konvertiere JPEGs in WebP und resize auf 800x600
 echo "Starte die Konvertierung von JPEGs in WebP und resize auf 800x600..."
