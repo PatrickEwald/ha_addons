@@ -1,13 +1,20 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+FROM python:3.9-alpine
 
-# Fehlerüberprüfung aktivieren
-RUN set -e; \
-    # Installiere die erforderlichen Pakete für das Add-on
-    apk add --no-cache python3 python3-dev py3-pip ffmpeg && \
-    pip3 install --no-cache-dir Pillow
+# Installiere FFmpeg und Pillow-Abhängigkeiten
+RUN apk add --no-cache \
+    ffmpeg \
+    zlib-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    lcms2-dev \
+    openjpeg-dev \
+    tiff-dev \
+    tk-dev
 
-# Setze das Arbeitsverzeichnis auf das persistente Datenverzeichnis des Add-ons
+# Installiere Pillow
+RUN pip install --no-cache-dir Pillow
+
+# Setze das Arbeitsverzeichnis
 WORKDIR /data
 
 # Kopiere die Daten für das Add-on
