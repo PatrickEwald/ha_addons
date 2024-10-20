@@ -1,6 +1,6 @@
 name: "Hello world"
 description: "My first real add-on!"
-version: "1.4.1"
+version: "1.4.2"
 slug: "hello_world"
 options:
   inputpath: "/media"
