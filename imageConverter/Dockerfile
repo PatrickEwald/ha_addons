@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir Pillow
 # Setze das Arbeitsverzeichnis
 WORKDIR /data
 
-# Kopiere die Daten für das Add-on
+# Kopiere das Skript ins Arbeitsverzeichnis
 COPY run.sh /run.sh
 RUN chmod a+x /run.sh
 
 # Führe das Skript aus
-CMD [ "/run.sh" ]
+CMD [ "/bin/sh", "/run.sh" ]

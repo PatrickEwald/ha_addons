@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # Debug-Ausgabe aktivieren
 set -x  # Zeigt alle ausgeführten Befehle an
@@ -7,10 +7,10 @@ set -e  # Beende das Skript bei Fehlern
 # Konvertiere JPEGs in WebP und resize auf 800x600
 echo "Starte die Konvertierung von JPEGs in WebP und resize auf 800x600..."
 
-# Schleife über alle JPEG-Dateien im /data-Verzeichnis
+# Schleife über alle JPEG-Dateien im /media-Verzeichnis
 for img in /media/*.jpg; do
   # Überprüfe, ob die Datei existiert
-  if [[ -f "$img" ]]; then
+  if [ -f "$img" ]; then
     echo "Verarbeite: $img"
     
     # Resize das Bild auf 800x600 und speichere es temporär
