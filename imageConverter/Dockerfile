@@ -1,17 +1,21 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install requirements for add-on
+# Installiere die erforderlichen Pakete für das Add-on
 RUN \
   apk add --no-cache \
-    python3
+    python3 \
+    python3-dev \
+    py3-pip \
+    ffmpeg && \
+  pip3 install --no-cache-dir Pillow
 
-# Python 3 HTTP Server serves the current working dir
-# So let's set it to our add-on persistent data directory.
+# Setze das Arbeitsverzeichnis auf das persistente Datenverzeichnis des Add-ons
 WORKDIR /data
 
-# Copy data for add-on
+# Kopiere die Daten für das Add-on
 COPY run.sh /
 RUN chmod a+x /run.sh
 
+# Führe das Skript aus
 CMD [ "/run.sh" ]
