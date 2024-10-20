@@ -1,0 +1,11 @@
+name: "Image Converter"
+description: "Converts JPEG to WebP using FFmpeg"
+version: "1.0.0"
+slug: "image_converter"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
