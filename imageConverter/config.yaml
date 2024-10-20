@@ -1,7 +1,7 @@
-name: "Image Converter"
-description: "Converts JPEG to WebP using FFmpeg"
-version: "1.0.0"
-slug: "image_converter"
+name: "Hello world"
+description: "My first real add-on!"
+version: "1.1.0"
+slug: "hello_world"
 init: false
 arch:
   - aarch64
@@ -9,3 +9,6 @@ arch:
   - armhf
   - armv7
   - i386
+startup: services
+ports:
+  8000/tcp: 8000

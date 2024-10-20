@@ -1,13 +1,17 @@
-FROM alpine:3.18
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
-# Install FFmpeg
-RUN apk add --no-cache ffmpeg bash
+# Install requirements for add-on
+RUN \
+  apk add --no-cache \
+    python3
 
-# Kopiere das Startskript
-COPY run.sh /run.sh
+# Python 3 HTTP Server serves the current working dir
+# So let's set it to our add-on persistent data directory.
+WORKDIR /data
 
-# Setze die Ausführungsrechte für das Skript
+# Copy data for add-on
+COPY run.sh /
 RUN chmod a+x /run.sh
 
-# Setze das Skript als Entrypoint
-CMD ["/run.sh"]
+CMD [ "/run.sh" ]
