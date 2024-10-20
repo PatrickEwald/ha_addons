@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Debug-Ausgabe aktivieren
-set -x  # Zeigt alle ausgeführten Befehle an
+# set -x  # Zeigt alle ausgeführten Befehle an
 set -e  # Beende das Skript bei Fehlern
 
 # Verzeichnis, in dem die JPG- und WebP-Dateien liegen
@@ -43,6 +43,10 @@ for img in "$directory"/*.jpg; do
     # Entferne das temporäre Bild
     rm "$temp_img"
     echo "Temporäres Bild gelöscht."
+
+    # Lösche die originale JPEG-Datei
+    rm "$img"
+    echo "Originales JPEG-Bild gelöscht: $img"
   else
     echo "Keine JPEG-Dateien zum Konvertieren gefunden."
   fi
@@ -50,7 +54,7 @@ done
 
 echo "Konvertierung abgeschlossen."
 
-# Erstelle ein WebM-Video aus den WebP-Dateien
-echo "Erstelle WebM-Video aus den WebP-Dateien..."
-ffmpeg -framerate 1 -i "$directory/index%d.webp" -c:v libvpx -crf 10 -b:v 1M "$directory/output_video.webm"
-echo "WebM-Video erstellt: output_video.webm"
+# Erstelle ein MP4-Video aus den WebP-Dateien
+echo "Erstelle MP4-Video aus den WebP-Dateien..."
+ffmpeg -framerate 25 -i "$directory/index%d.webp" -c:v libx264 -r 30 -pix_fmt yuv420p "$directory/output.mp4"
+echo "MP4-Video erstellt: output.mp4"
