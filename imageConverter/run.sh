@@ -56,5 +56,5 @@ echo "Konvertierung abgeschlossen."
 
 # Erstelle ein MP4-Video aus den WebP-Dateien
 echo "Erstelle MP4-Video aus den WebP-Dateien..."
-ffmpeg -y -framerate 25 -i "$directory/index%d.webp" -c:v libx264 -r 30 -pix_fmt yuv420p "$directory/output.mp4"
+ffmpeg -y -framerate 25 -i "$directory/index%d.webp" -vf reverse -c:v libx264 -r 30 -pix_fmt yuv420p "$directory/output.mp4"
 echo "MP4-Video erstellt: output.mp4"
