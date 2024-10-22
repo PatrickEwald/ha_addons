@@ -8,5 +8,8 @@ RUN \
     curl -sSLf -o /usr/bin/tempio \
     "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${BUILD_ARCH}"
 
+# Installiere FFmpeg
+RUN apk add --no-cache ffmpeg
+
 # Copy root filesystem
 COPY rootfs /
