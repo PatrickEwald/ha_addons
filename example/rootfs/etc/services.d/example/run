@@ -10,11 +10,14 @@
 declare message
 declare framerate
 declare inputpath
+declare loglevel
 
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
 inputpath=$(bashio::config 'inputpath')
+loglevel=$(bashio::config 'loglevel')
+
 
 # Finde die höchste vorhandene WebP-Datei-Nummer
 last_index=$(ls "$inputpath"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
@@ -69,7 +72,7 @@ bashio::log.info "Konvertierung abgeschlossen."
 
 # Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
 bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
-ffmpeg -loglevel error -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
+ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
 bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
 
 
