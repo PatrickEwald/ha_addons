@@ -1,5 +1,5 @@
-# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-dockerfile
-FROM ghcr.io/home-assistant/amd64-base:16.2.3
+
+FROM https://ghcr.io/home-assistant/amd64-base:3.20
 
 RUN apk add --no-cache ffmpeg
 
