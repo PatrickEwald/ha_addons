@@ -8,18 +8,13 @@
 
 # Declare variables
 declare message
+declare framerate
+declare inputpath
 
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
 inputpath=$(bashio::config 'inputpath')
-
-## Print the message the user supplied, defaults to "Hello World..."
-bashio::log.info "${message:="Hello World..."}"
-
-# Verzeichnis, in dem die JPG- und WebP-Dateien liegen
-#inputpath="/media/imageToMovie"
-
 
 # Finde die höchste vorhandene WebP-Datei-Nummer
 last_index=$(ls "$inputpath"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
@@ -34,7 +29,8 @@ bashio::log.info "Starte Konvertierung von JPEGs in WebP und resize auf 800x600"
 for img in "$inputpath"/*.jpg; do
   # Überprüfe, ob die Datei existiert
   if [ -f "$img" ]; then
-    echo "Verarbeite: $img"
+
+    bashio::log.info "Verarbeite: $img"
     
     # Erhöhe die Nummer für die neue WebP-Datei
     new_index=$((last_index + 1))
@@ -45,33 +41,36 @@ for img in "$inputpath"/*.jpg; do
     
     # Resize das Bild auf 800x600 und speichere es temporär
     ffmpeg -loglevel error -i "$img" -vf "scale=800:600" "$temp_img"
-    echo "Erstellt temporäres Bild: $temp_img"
+
+    bashio::log.info "Erstellt temporäres Bild: $temp_img"
 
     # Benenne die neue WebP-Datei mit der nächsten Indexnummer
     webp_img="$inputpath/index$new_index.webp"
     
     # Konvertiere das temporäre Bild in WebP
     ffmpeg -loglevel error -i "$temp_img" -quality 80 "$webp_img"
-    echo "Erstellt: $webp_img"
+
+    bashio::log.info "Erstellt: $webp_img"
     
     # Entferne das temporäre Bild
     rm "$temp_img"
-    echo "Temporäres Bild gelöscht."
+
+    bashio::log.info "Temporäres Bild gelöscht."
 
     # Lösche die originale JPEG-Datei
     rm "$img"
-    echo "Originales JPEG-Bild gelöscht: $img"
+    bashio::log.info "Originales JPEG-Bild gelöscht: $img"
   else
-    echo "Keine JPEG-Dateien zum Konvertieren gefunden."
+    bashio::log.info "Keine JPEG-Dateien zum Konvertieren gefunden."
   fi
 done
 
-echo "Konvertierung abgeschlossen."
+bashio::log.info "Konvertierung abgeschlossen."
 
 # Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
-echo "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
+bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
 ffmpeg -loglevel error -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
-echo "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
+bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
 
 
 ## Run your program
