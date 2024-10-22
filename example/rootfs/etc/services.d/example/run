@@ -11,13 +11,10 @@ declare message
 
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
+framerate=$(bashio::config 'framerate')
 
 ## Print the message the user supplied, defaults to "Hello World..."
 bashio::log.info "${message:="Hello World..."}"
-
-# Ausgabe der FFmpeg-Version
-echo "FFmpeg Version:"
-ffmpeg -version
 
 # Verzeichnis, in dem die JPG- und WebP-Dateien liegen
 directory="/media/imageToMovie"
@@ -73,7 +70,7 @@ echo "Konvertierung abgeschlossen."
 
 # Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
 echo "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
-ffmpeg -loglevel error -y -framerate 25 -i "$directory/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$directory/output.mp4"
+ffmpeg -loglevel error -y -framerate $framerate -i "$directory/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$directory/output.mp4"
 echo "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
 
 
