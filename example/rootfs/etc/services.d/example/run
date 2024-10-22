@@ -12,26 +12,26 @@ declare message
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
+inputpath=$(bashio::config 'inputpath')
 
 ## Print the message the user supplied, defaults to "Hello World..."
 bashio::log.info "${message:="Hello World..."}"
 
 # Verzeichnis, in dem die JPG- und WebP-Dateien liegen
-directory="/media/imageToMovie"
+#inputpath="/media/imageToMovie"
 
-# Konvertiere JPEGs in WebP und resize auf 800x600
-echo "Starte die Konvertierung von JPEGs in WebP und resize auf 800x600..."
 
 # Finde die höchste vorhandene WebP-Datei-Nummer
-last_index=$(ls "$directory"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
+last_index=$(ls "$inputpath"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
 if [ -z "$last_index" ]; then
   last_index=0
 fi
 
 bashio::log.info "last_index: ${last_index}"
+bashio::log.info "Starte Konvertierung von JPEGs in WebP und resize auf 800x600"
 
 # Schleife über alle JPEG-Dateien im Verzeichnis
-for img in "$directory"/*.jpg; do
+for img in "$inputpath"/*.jpg; do
   # Überprüfe, ob die Datei existiert
   if [ -f "$img" ]; then
     echo "Verarbeite: $img"
@@ -41,14 +41,14 @@ for img in "$directory"/*.jpg; do
     last_index=$new_index
     
     # Erstelle einen temporären Dateinamen
-    temp_img="$directory/temp_resized.jpg"
+    temp_img="$inputpath/temp_resized.jpg"
     
     # Resize das Bild auf 800x600 und speichere es temporär
     ffmpeg -loglevel error -i "$img" -vf "scale=800:600" "$temp_img"
     echo "Erstellt temporäres Bild: $temp_img"
 
     # Benenne die neue WebP-Datei mit der nächsten Indexnummer
-    webp_img="$directory/index$new_index.webp"
+    webp_img="$inputpath/index$new_index.webp"
     
     # Konvertiere das temporäre Bild in WebP
     ffmpeg -loglevel error -i "$temp_img" -quality 80 "$webp_img"
@@ -70,7 +70,7 @@ echo "Konvertierung abgeschlossen."
 
 # Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
 echo "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
-ffmpeg -loglevel error -y -framerate $framerate -i "$directory/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$directory/output.mp4"
+ffmpeg -loglevel error -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
 echo "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
 
 
