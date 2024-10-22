@@ -16,7 +16,6 @@ map:
 options:
   message: "Hello world..."
   framerate: 25
-
 schema:
   message: "str?"
   framerate: "int:1-30"
