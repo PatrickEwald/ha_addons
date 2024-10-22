@@ -1,14 +1,10 @@
 #!/usr/bin/with-contenv bashio
 
-# Declare variables
-# declare message
 declare framerate
 declare inputpath
 declare loglevel
 declare revert
 
-## Get the 'message' key from the user config options.
-# message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
 inputpath=$(bashio::config 'inputpath')
 loglevel=$(bashio::config 'loglevel')
@@ -75,6 +71,3 @@ else
   bashio::log.info "MP4-Video erstellt: output.mp4"
 fi
 
-
-## Run your program
-#exec /usr/bin/my_program
