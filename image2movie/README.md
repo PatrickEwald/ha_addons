@@ -1,4 +1,4 @@
-# Home Assistant Add-on: Example add-on
+# Home Assistant Add-on: image2movie
 
 Konvertiert .jpeg Bilder in ein .mp4 Video
 
