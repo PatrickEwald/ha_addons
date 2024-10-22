@@ -1,7 +1,4 @@
 #!/bin/bash
 
-echo "All done!" > /share/example_addon_output.txt
+echo "All done!"
 
-# Ausgabe der FFmpeg-Version
-echo "FFmpeg Version:"
-ffmpeg -version

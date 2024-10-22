@@ -15,5 +15,10 @@ message=$(bashio::config 'message')
 ## Print the message the user supplied, defaults to "Hello World..."
 bashio::log.info "${message:="Hello World..."}"
 
+# Ausgabe der FFmpeg-Version
+echo "FFmpeg Version:"
+ffmpeg -version
+
+
 ## Run your program
 exec /usr/bin/my_program
