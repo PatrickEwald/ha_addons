@@ -61,13 +61,16 @@ done
 
 bashio::log.info "Konvertierung der Bilder abgeschlossen."
 
-if [[ "$revert" == "true" ]]; then
-  bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
-  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -crf 30 -b:v 600k -maxrate 800k -bufsize 1600k -profile:v main -level 4.0 -movflags +faststart -an -pix_fmt yuv420p "$inputpath/output.mp4"
-  bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
-else
-  bashio::log.info "Erstelle MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
-  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -crf 30 -b:v 600k -maxrate 800k -bufsize 1600k -profile:v main -level 4.0 -movflags +faststart -an -pix_fmt yuv420p "$inputpath/output.mp4"
-  bashio::log.info "MP4-Video erstellt: output.mp4"
-fi
+timestamp=$(date +"%Y%m%d_%H%M%S")
 
+if [[ "$revert" == "true" ]]; then
+  bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien mit $framerate Bilden pro Sekunde"
+  output_file="$inputpath/output_revert_$timestamp.mp4"
+  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -crf 30 -b:v 600k -maxrate 800k -bufsize 1600k -profile:v main -level 4.0 -movflags +faststart -an -pix_fmt yuv420p -vf "reverse" "$output_file"
+  bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: $output_file"
+else
+  bashio::log.info "Erstelle MP4-Video aus den WebP-Dateien mit $framerate Bilden pro Sekunde"
+  output_file="$inputpath/output_$timestamp.mp4"
+  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -crf 30 -b:v 600k -maxrate 800k -bufsize 1600k -profile:v main -level 4.0 -movflags +faststart -an -pix_fmt yuv420p "$output_file"
+  bashio::log.info "MP4-Video erstellt: $output_file"
+fi
