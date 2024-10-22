@@ -11,12 +11,14 @@ declare message
 declare framerate
 declare inputpath
 declare loglevel
+declare revert
 
 ## Get the 'message' key from the user config options.
 message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
 inputpath=$(bashio::config 'inputpath')
 loglevel=$(bashio::config 'loglevel')
+revert=$(bashio::config 'revert')
 
 
 # Finde die höchste vorhandene WebP-Datei-Nummer
@@ -68,13 +70,19 @@ for img in "$inputpath"/*.jpg; do
   fi
 done
 
-bashio::log.info "Konvertierung abgeschlossen."
+bashio::log.info "Konvertierung der Bilder abgeschlossen."
 
-# Erstelle ein rückwärtslaufendes MP4-Video aus den WebP-Dateien
-bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien..."
-ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
-bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
+
+if [[ "$revert" == "true" ]]; then
+  bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
+  ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
+  bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
+else
+  bashio::log.info "Erstelle MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
+  ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
+  bashio::log.info "Normales MP4-Video erstellt: output.mp4"
+fi
 
 
 ## Run your program
-exec /usr/bin/my_program
+#exec /usr/bin/my_program

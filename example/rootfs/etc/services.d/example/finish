@@ -17,7 +17,7 @@
 
 declare APP_EXIT_CODE=${1}
 
-echo "Exit-Code: ${APP_EXIT_CODE}"
+#echo "Exit-Code: ${APP_EXIT_CODE}"
 bashio::log.info "Halt add-on with exit code ${APP_EXIT_CODE}"
 echo "${APP_EXIT_CODE}" > /run/s6-linux-init-container-results/exitcode
 exec /run/s6/basedir/bin/halt
