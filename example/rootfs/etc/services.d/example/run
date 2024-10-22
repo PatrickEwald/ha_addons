@@ -19,6 +19,20 @@ bashio::log.info "${message:="Hello World..."}"
 echo "FFmpeg Version:"
 ffmpeg -version
 
+# Verzeichnis, in dem die JPG- und WebP-Dateien liegen
+directory="/media/imageToMovie"
+
+# Konvertiere JPEGs in WebP und resize auf 800x600
+echo "Starte die Konvertierung von JPEGs in WebP und resize auf 800x600..."
+
+# Finde die höchste vorhandene WebP-Datei-Nummer
+last_index=$(ls "$directory"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
+if [ -z "$last_index" ]; then
+  last_index=0
+fi
+
+bashio::log.info "last_index: ${last_index}"
+
 
 ## Run your program
 exec /usr/bin/my_program
