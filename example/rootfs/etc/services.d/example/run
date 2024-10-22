@@ -1,25 +1,18 @@
 #!/usr/bin/with-contenv bashio
-# ==============================================================================
-# Start the example service
-# s6-overlay docs: https://github.com/just-containers/s6-overlay
-# ==============================================================================
-
-# Add your code here
 
 # Declare variables
-declare message
+# declare message
 declare framerate
 declare inputpath
 declare loglevel
 declare revert
 
 ## Get the 'message' key from the user config options.
-message=$(bashio::config 'message')
+# message=$(bashio::config 'message')
 framerate=$(bashio::config 'framerate')
 inputpath=$(bashio::config 'inputpath')
 loglevel=$(bashio::config 'loglevel')
 revert=$(bashio::config 'revert')
-
 
 # Finde die höchste vorhandene WebP-Datei-Nummer
 last_index=$(ls "$inputpath"/index*.webp 2>/dev/null | sed -E 's/.*index([0-9]+)\.webp/\1/' | sort -n | tail -1)
@@ -72,15 +65,14 @@ done
 
 bashio::log.info "Konvertierung der Bilder abgeschlossen."
 
-
 if [[ "$revert" == "true" ]]; then
   bashio::log.info "Erstelle rückwärtslaufendes MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
-  ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
+  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -vf reverse -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
   bashio::log.info "Rückwärtslaufendes MP4-Video erstellt: output.mp4"
 else
   bashio::log.info "Erstelle MP4-Video aus den WebP-Dateien mit $framerate Bilden pro sekunde"
-  ffmpeg -loglevel $loglevel -y -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
-  bashio::log.info "Normales MP4-Video erstellt: output.mp4"
+  ffmpeg -y -loglevel $loglevel -framerate $framerate -i "$inputpath/index%d.webp" -c:v libx264 -pix_fmt yuv420p -profile:v baseline -level 3.0 -movflags +faststart "$inputpath/output.mp4"
+  bashio::log.info "MP4-Video erstellt: output.mp4"
 fi
 
 

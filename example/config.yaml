@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Example add-on
-version: "1.4.0"
+version: "1.4.1"
 slug: example
 description: Example add-on
 url: "https://github.com/home-assistant/addons-example/tree/main/example"
@@ -14,13 +14,11 @@ init: false
 map:
   - media:rw
 options:
-  message: "Hello world..."
   inputpath: "/media"
   framerate: 25
   loglevel: "error"
   revert: false
 schema:
-  message: "str?"
   inputpath: "str"
   framerate: "int"
   loglevel: "list(quiet|panic|fatal|error|warning|info|verbose|debug)"
