@@ -8,17 +8,6 @@ from datetime import datetime
 def log(message, level="INFO"):
     print(f"{level}: {message}")
 
-def check_ffmpeg():
-    try:
-        result = subprocess.run(["which", "ffmpeg"], stdout=subprocess.PIPE, text=True)
-        ffmpeg_path = result.stdout.strip()
-        if ffmpeg_path:
-            log(f"FFmpeg gefunden unter: {ffmpeg_path}")
-        else:
-            log("FFmpeg wurde nicht gefunden. Stellen Sie sicher, dass es installiert ist.", level="ERROR")
-    except Exception as e:
-        log(f"Fehler beim Überprüfen von FFmpeg: {e}", level="ERROR")
-
 def create_video(framerate, inputpath, loglevel, revert):
     current_time = datetime.now().strftime("%Y-%m-%d-%H%M")
     output_video = f'/media/timelapse-{current_time}.mp4'
@@ -29,7 +18,6 @@ def create_video(framerate, inputpath, loglevel, revert):
         if filename.endswith(".jpg") and filename.startswith("yourcamera_"):
             filenames.append(filename)
 
-    # Wenn revert aktiviert ist, kehre die Reihenfolge der Dateinamen um
     if revert.lower() == 'true':
         filenames.reverse()
 
@@ -43,15 +31,18 @@ def create_video(framerate, inputpath, loglevel, revert):
         "ffmpeg",
         "-y",
         "-loglevel", loglevel,
-        "-pattern_type", "glob",
         "-framerate", str(framerate),
         "-i", f"{inputpath}/yourcamera_*.jpg",
-        "-vcodec", "libx264",
-        "-crf", "23",
-        "-pix_fmt", "yuv420p",
-        "-profile:v", "baseline",
+        "-c:v", "libx264",
+        "-crf", "30",
+        "-b:v", "600k",
+        "-maxrate", "800k",
+        "-bufsize", "1600k",
+        "-profile:v", "main",
         "-level", "4.0",
-        "-movflags", "+faststart"
+        "-movflags", "+faststart",
+        "-an",
+        "-pix_fmt", "yuv420p"
     ]
 
     if revert.lower() == 'true':
@@ -65,7 +56,6 @@ def create_video(framerate, inputpath, loglevel, revert):
     except subprocess.CalledProcessError as e:
         log(f"Fehler beim Erstellen des Videos: {e}", level="ERROR")
 
-
 if __name__ == "__main__":
     if len(sys.argv) < 5:
         log("Fehlende Argumente. Erwartet: framerate, inputpath, loglevel, revert", level="ERROR")
@@ -76,5 +66,4 @@ if __name__ == "__main__":
     loglevel = sys.argv[3]
     revert = sys.argv[4]
 
-    check_ffmpeg()
     create_video(framerate, inputpath, loglevel, revert)
