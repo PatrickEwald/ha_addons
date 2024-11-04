@@ -3,6 +3,7 @@ import os
 import sys
 import json
 import subprocess
+from datetime import datetime
 
 def log(message, level="INFO"):
     print(f"{level}: {message}")
@@ -19,8 +20,10 @@ def check_ffmpeg():
         log(f"Fehler beim Überprüfen von FFmpeg: {e}", level="ERROR")
 
 def create_video(framerate, inputpath, loglevel, revert):
-    output_video = '/media/timelapse-webp.mp4'
-    output_json = '/media/filenames.json'
+    # Erzeuge den Dateinamen basierend auf dem aktuellen Datum und der Uhrzeit
+    current_time = datetime.now().strftime("%Y-%m-%d-%H%M")
+    output_video = f'/media/timelapse-{current_time}.mp4'
+    output_json = '/media/filenames-{current_time}.json'
 
     filenames = []
     for filename in sorted(os.listdir(inputpath)):
@@ -38,10 +41,11 @@ def create_video(framerate, inputpath, loglevel, revert):
     log(f"Array der Dateinamen erfolgreich in {output_json} gespeichert.")
     log(f"Anzahl der Frames (Bilder) für das Video: {len(filenames)}")
 
-    # Erstelle den FFmpeg-Befehl
+    # Erstelle den FFmpeg-Befehl mit dem -y Flag
     ffmpeg_command = [
         "ffmpeg",
-        "-loglevel", loglevel,         # FFmpeg-Loglevel setzen
+        "-y",                    # Automatisch überschreiben, falls die Datei bereits existiert
+        "-loglevel", loglevel,   # FFmpeg-Loglevel setzen
         "-pattern_type", "glob",
         "-framerate", str(framerate),
         "-i", f"{inputpath}/yourcamera_*.jpg",
