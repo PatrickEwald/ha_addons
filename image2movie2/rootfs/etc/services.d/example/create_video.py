@@ -29,15 +29,11 @@ def create_video(framerate, inputpath, loglevel, revert):
         log("Keine Bilddateien gefunden, die dem Muster entsprechen.", level="ERROR")
         return
 
-    # Temporäre Textdatei für die Eingabepfade erstellen
-    temp_file = "/tmp/input_files.txt"  # Speichere die temporäre Datei im /tmp/ Verzeichnis
+    temp_file = "/tmp/input_files.txt" 
     with open(temp_file, 'w') as f:
         for filename in filenames:
             f.write(f"file '{inputpath}/{filename}'\n")
 
-    # log(f"Inhalt der temporären Datei:\n{open(temp_file).read()}")  # Logge den Inhalt der temporären Datei
-
-    # FFmpeg-Befehl erstellen
     ffmpeg_command = [
         "ffmpeg",
         "-y",
@@ -46,17 +42,17 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-safe", "0",
         "-i", temp_file,
         "-framerate", str(framerate),
-        "-s", "800x600",  # Setze die Größe auf 800x600
+        "-s", "800x600",
         "-c:v", "libx264",
-        "-crf", "18",  # Bessere Qualität
-        "-b:v", "1000k",  # Erhöhte Bitrate
+        "-crf", "18",
+        "-b:v", "1000k",
         "-maxrate", "1200k",
-        "-bufsize", "2400k",  # Erhöhte Puffergröße
-        "-profile:v", "high",  # Höheres Profil für bessere Qualität
+        "-bufsize", "2400k",
+        "-profile:v", "high",
         "-level", "4.0",
         "-movflags", "+faststart",
         "-an",
-        "-pix_fmt", "yuv420p"  # Setze das Pixel-Format
+        "-pix_fmt", "yuv420p"
     ]
 
     ffmpeg_command.append(output_video)
@@ -67,7 +63,6 @@ def create_video(framerate, inputpath, loglevel, revert):
     except subprocess.CalledProcessError as e:
         log(f"Fehler beim Erstellen des Videos: {e}", level="ERROR")
     finally:
-        # Temporäre Datei löschen
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
