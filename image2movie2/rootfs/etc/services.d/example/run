@@ -1,0 +1,13 @@
+#!/usr/bin/with-contenv bashio
+
+# Setze Ausführungsrechte für das Skript
+chmod +x /config/scripts/run_create_video.sh
+
+# Prüfe, ob Python und FFmpeg installiert sind
+if ! command -v python3 &> /dev/null || ! command -v ffmpeg &> /dev/null; then
+    bashio::log.error "Python3 oder FFmpeg sind nicht installiert. Installiere sie zuerst."
+    exit 1
+fi
+
+# Starte das Python-Skript
+python3 /config/scripts/create_video.py
