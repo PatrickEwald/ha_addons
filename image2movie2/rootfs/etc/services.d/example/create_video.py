@@ -8,13 +8,13 @@ from datetime import datetime
 def log(message, level="INFO"):
     print(f"{level}: {message}")
 
-def create_video(framerate, inputpath, loglevel, revert):
+def create_video(framerate, inputpath, loglevel, revert, imageFormat):
     current_time = datetime.now().strftime("%Y-%m-%d-%H%M")
-    output_video = f'/media/timelapse-{current_time}.mp4'
-    output_json = f'/media/filenames-{current_time}.json'
+    output_video = f'/media/timelapse/timelapse-{current_time}.mp4'
+    output_json = f'/media/timelapse/filenames-{current_time}.json'
 
     filenames = [filename for filename in sorted(os.listdir(inputpath))
-                 if filename.endswith(".jpg") and filename.startswith("yourcamera_")]
+                 if filename.endswith(imageFormat) and filename.startswith("yourcamera_")]
 
     if revert.lower() == 'true':
         filenames.reverse()
@@ -75,5 +75,6 @@ if __name__ == "__main__":
     inputpath = sys.argv[2]
     loglevel = sys.argv[3]
     revert = sys.argv[4]
+    imageFormat = sys.argv[5]
 
-    create_video(framerate, inputpath, loglevel, revert)
+    create_video(framerate, inputpath, loglevel, revert, imageFormat)
