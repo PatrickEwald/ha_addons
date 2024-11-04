@@ -13,10 +13,8 @@ def create_video(framerate, inputpath, loglevel, revert):
     output_video = f'/media/timelapse-{current_time}.mp4'
     output_json = f'/media/filenames-{current_time}.json'
 
-    filenames = []
-    for filename in sorted(os.listdir(inputpath)):
-        if filename.endswith(".jpg") and filename.startswith("yourcamera_"):
-            filenames.append(filename)
+    filenames = [filename for filename in sorted(os.listdir(inputpath))
+                 if filename.endswith(".jpg") and filename.startswith("yourcamera_")]
 
     if revert.lower() == 'true':
         filenames.reverse()
@@ -27,13 +25,25 @@ def create_video(framerate, inputpath, loglevel, revert):
     log(f"Array der Dateinamen erfolgreich in {output_json} gespeichert.")
     log(f"Anzahl der Frames (Bilder) für das Video: {len(filenames)}")
 
-    input_files = ' '.join([f"{inputpath}/{filename}" for filename in filenames])
+    if not filenames:
+        log("Keine Bilddateien gefunden, die dem Muster entsprechen.", level="ERROR")
+        return
+
+    # Temporäre Textdatei für die Eingabepfade erstellen
+    temp_file = "/media/input_files.txt"
+    with open(temp_file, 'w') as f:
+        for filename in filenames:
+            f.write(f"file '{inputpath}/{filename}'\n")
+
+    # FFmpeg-Befehl erstellen
     ffmpeg_command = [
         "ffmpeg",
         "-y",
         "-loglevel", loglevel,
         "-framerate", str(framerate),
-        "-i", f"concat:{input_files}",  # Nutze concat, um die Dateinamen zu übergeben
+        "-f", "concat",
+        "-safe", "0",  # Erlaubt unsichere Dateipfade
+        "-i", temp_file,
         "-c:v", "libx264",
         "-crf", "30",
         "-b:v", "600k",
@@ -46,6 +56,7 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-pix_fmt", "yuv420p"
     ]
 
+    # Wenn revert aktiviert ist, füge das Reverse-Flag hinzu
     # if revert.lower() == 'true':
     #     ffmpeg_command.extend(["-vf", "reverse"])
 
@@ -56,6 +67,10 @@ def create_video(framerate, inputpath, loglevel, revert):
         log(f"Video erfolgreich erstellt: {output_video}")
     except subprocess.CalledProcessError as e:
         log(f"Fehler beim Erstellen des Videos: {e}", level="ERROR")
+    finally:
+        # Temporäre Datei löschen
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
