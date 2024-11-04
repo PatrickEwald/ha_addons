@@ -46,17 +46,17 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-safe", "0",
         "-i", temp_file,
         "-framerate", str(framerate),
-        "-s", "800x600", 
+        "-s", "800x600",  # Setze die Größe auf 800x600
         "-c:v", "libx264",
-        "-crf", "30",
-        "-b:v", "500k",
-        "-maxrate", "600k",
-        "-bufsize", "1200k",
-        "-profile:v", "main",
-        "-level", "3.0",
+        "-crf", "18",  # Bessere Qualität
+        "-b:v", "1000k",  # Erhöhte Bitrate
+        "-maxrate", "1200k",
+        "-bufsize", "2400k",  # Erhöhte Puffergröße
+        "-profile:v", "high",  # Höheres Profil für bessere Qualität
+        "-level", "4.0",
         "-movflags", "+faststart",
         "-an",
-        "-pix_fmt", "yuv420p"
+        "-pix_fmt", "yuv420p"  # Setze das Pixel-Format
     ]
 
     ffmpeg_command.append(output_video)
