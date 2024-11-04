@@ -50,7 +50,7 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-crf", "23",
         "-pix_fmt", "yuv420p",
         "-profile:v", "baseline",
-        "-level", "3.0",
+        "-level", "4.0",
         "-movflags", "+faststart"
     ]
 
