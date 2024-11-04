@@ -10,4 +10,4 @@ if ! command -v python3 &> /dev/null || ! command -v ffmpeg &> /dev/null; then
 fi
 
 # Starte das Python-Skript
-python3 /config/scripts/create_video.py
+python3 create_video.py
