@@ -20,7 +20,6 @@ def check_ffmpeg():
         log(f"Fehler beim Überprüfen von FFmpeg: {e}", level="ERROR")
 
 def create_video(framerate, inputpath, loglevel, revert):
-    # Erzeuge den Dateinamen basierend auf dem aktuellen Datum und der Uhrzeit
     current_time = datetime.now().strftime("%Y-%m-%d-%H%M")
     output_video = f'/media/timelapse-{current_time}.mp4'
     output_json = f'/media/filenames-{current_time}.json'
@@ -34,18 +33,16 @@ def create_video(framerate, inputpath, loglevel, revert):
     if revert.lower() == 'true':
         filenames.reverse()
 
-    # Speichere die Dateinamen in einer JSON-Datei
     with open(output_json, 'w') as json_file:
         json.dump(filenames, json_file, indent=4)
 
     log(f"Array der Dateinamen erfolgreich in {output_json} gespeichert.")
     log(f"Anzahl der Frames (Bilder) für das Video: {len(filenames)}")
 
-    # Erstelle den FFmpeg-Befehl mit dem -y Flag
     ffmpeg_command = [
         "ffmpeg",
-        "-y",                    # Automatisch überschreiben, falls die Datei bereits existiert
-        "-loglevel", loglevel,   # FFmpeg-Loglevel setzen
+        "-y",
+        "-loglevel", loglevel,
         "-pattern_type", "glob",
         "-framerate", str(framerate),
         "-i", f"{inputpath}/yourcamera_*.jpg",
@@ -54,14 +51,13 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-pix_fmt", "yuv420p",
         "-profile:v", "baseline",
         "-level", "3.0",
-        "-movflags", "+faststart",
-        output_video
+        "-movflags", "+faststart"
     ]
 
-    # Wenn revert aktiviert ist, füge das Reverse-Flag hinzu
     if revert.lower() == 'true':
-        ffmpeg_command.insert(1, "-vf")
-        ffmpeg_command.insert(2, "reverse")
+        ffmpeg_command.extend(["-vf", "reverse"])
+
+    ffmpeg_command.append(output_video)
 
     try:
         subprocess.run(ffmpeg_command, check=True)
@@ -75,12 +71,10 @@ if __name__ == "__main__":
         log("Fehlende Argumente. Erwartet: framerate, inputpath, loglevel, revert", level="ERROR")
         sys.exit(1)
 
-    # Argumente auslesen
     framerate = sys.argv[1]
     inputpath = sys.argv[2]
     loglevel = sys.argv[3]
     revert = sys.argv[4]
 
-    # FFmpeg prüfen und Video erstellen
     check_ffmpeg()
     create_video(framerate, inputpath, loglevel, revert)
