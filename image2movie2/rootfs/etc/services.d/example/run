@@ -46,14 +46,14 @@ if [ -z "$framerate" ] || [ -z "$inputpath" ] || [ -z "$loglevel" ] || [ -z "$re
 fi
 
 # Prüfen, ob die Bilder im Verzeichnis fehlerfrei sind
-bashio::log.info "Überprüfe Bilder auf Fehler..."
-for img in "$inputpath"/*.jpg; do
-    bashio::log.info "Überprüfe Bild: $img"
-    ffmpeg -v error -i "$img" -f null - 2>&1 | tee -a /media/ffmpeg_errors.log || {
-        bashio::log.error "Fehler in Bild: $img"
-        echo "Fehler in Bild: $img"
-    }
-done
+# bashio::log.info "Überprüfe Bilder auf Fehler..."
+# for img in "$inputpath"/*.jpg; do
+#     bashio::log.info "Überprüfe Bild: $img"
+#     ffmpeg -v error -i "$img" -f null - 2>&1 | tee -a /media/ffmpeg_errors.log || {
+#         bashio::log.error "Fehler in Bild: $img"
+#         echo "Fehler in Bild: $img"
+#     }
+# done
 
 # Starte das Python-Skript mit den übergebenen Argumenten und verwende $SCRIPT_DIR
 bashio::log.info "Starte das Python-Skript $SCRIPT_DIR/create_video.py mit übergebenen Konfigurationswerten"
