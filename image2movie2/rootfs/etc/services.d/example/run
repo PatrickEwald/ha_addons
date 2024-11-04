@@ -1,5 +1,6 @@
 #!/usr/bin/with-contenv bashio
 
+# Variablen deklarieren
 declare framerate
 declare inputpath
 declare loglevel
@@ -14,12 +15,49 @@ revert=$(bashio::config 'revert')
 # Verzeichnis des Skripts ermitteln
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Prüfen, ob Python3 und FFmpeg installiert sind
+if ! command -v python3 &> /dev/null; then
+    bashio::log.error "Python3 ist nicht installiert. Bitte installieren Sie es zuerst."
+    exit 1
+elif ! command -v ffmpeg &> /dev/null; then
+    bashio::log.error "FFmpeg ist nicht installiert. Bitte installieren Sie es zuerst."
+    exit 1
+else
+    bashio::log.info "Python3 und FFmpeg wurden erfolgreich gefunden."
+fi
+
 # Setze Ausführungsrechte für create_video.py im gleichen Verzeichnis
 chmod +x "$SCRIPT_DIR/create_video.py" || {
     bashio::log.error "Fehler beim Setzen der Ausführungsrechte für create_video.py"
     exit 1
 }
 
+# Konfigurationswerte protokollieren
+bashio::log.info "Konfigurationswerte:"
+bashio::log.info "Framerate: $framerate"
+bashio::log.info "Input Path: $inputpath"
+bashio::log.info "Log Level: $loglevel"
+bashio::log.info "Revert: $revert"
+
+# Überprüfen, ob die notwendigen Konfigurationswerte gesetzt sind
+if [ -z "$framerate" ] || [ -z "$inputpath" ] || [ -z "$loglevel" ] || [ -z "$revert" ]; then
+    bashio::log.error "Fehlende Konfigurationswerte. Bitte stellen Sie sicher, dass alle Werte konfiguriert sind."
+    exit 1
+fi
+
+# Prüfen, ob die Bilder im Verzeichnis fehlerfrei sind
+bashio::log.info "Überprüfe Bilder auf Fehler..."
+for img in "$inputpath"/*.jpg; do
+    ffmpeg -v error -i "$img" -f null - || bashio::log.error "Fehler in Bild: $img"
+done
+
 # Starte das Python-Skript mit den übergebenen Argumenten und verwende $SCRIPT_DIR
 bashio::log.info "Starte das Python-Skript $SCRIPT_DIR/create_video.py mit übergebenen Konfigurationswerten"
 python3 "$SCRIPT_DIR/create_video.py" "$framerate" "$inputpath" "$loglevel" "$revert"
+
+# Überprüfe den Exit-Code des Python-Skripts und protokolliere das Ergebnis
+if [ $? -eq 0 ]; then
+    bashio::log.info "Das Python-Skript wurde erfolgreich abgeschlossen."
+else
+    bashio::log.error "Fehler beim Ausführen des Python-Skripts."
+fi

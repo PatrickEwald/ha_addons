@@ -23,7 +23,7 @@ def create_video(framerate, inputpath, loglevel, revert):
     # Erzeuge den Dateinamen basierend auf dem aktuellen Datum und der Uhrzeit
     current_time = datetime.now().strftime("%Y-%m-%d-%H%M")
     output_video = f'/media/timelapse-{current_time}.mp4'
-    output_json = '/media/filenames-{current_time}.json'
+    output_json = f'/media/filenames-{current_time}.json'
 
     filenames = []
     for filename in sorted(os.listdir(inputpath)):
