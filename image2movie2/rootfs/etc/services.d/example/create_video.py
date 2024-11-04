@@ -35,7 +35,7 @@ def create_video(framerate, inputpath, loglevel, revert):
         for filename in filenames:
             f.write(f"file '{inputpath}/{filename}'\n")
 
-    log(f"Inhalt der temporären Datei:\n{open(temp_file).read()}")  # Logge den Inhalt der temporären Datei
+    # log(f"Inhalt der temporären Datei:\n{open(temp_file).read()}")  # Logge den Inhalt der temporären Datei
 
     # FFmpeg-Befehl erstellen
     ffmpeg_command = [
