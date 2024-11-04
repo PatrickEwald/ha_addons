@@ -1,6 +1,6 @@
 # https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
 name: Image2Movie2
-version: "1.0.17"
+version: "1.0.18"
 slug: image2movie2
 description: Image2Movie - erzeugt ein .mp4 Video aus jpeg Bildern
 url: "https://github.com/PatrickEwald/ha_addons/tree/main/example"

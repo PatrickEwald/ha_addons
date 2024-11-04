@@ -30,7 +30,7 @@ def create_video(framerate, inputpath, loglevel, revert):
         return
 
     # Temporäre Textdatei für die Eingabepfade erstellen
-    temp_file = "/tmp/input_files.txt"  # Ändere den Pfad auf /tmp/
+    temp_file = "/tmp/input_files.txt"  # Speichere die temporäre Datei im /tmp/ Verzeichnis
     with open(temp_file, 'w') as f:
         for filename in filenames:
             f.write(f"file '{inputpath}/{filename}'\n")
@@ -42,10 +42,10 @@ def create_video(framerate, inputpath, loglevel, revert):
         "ffmpeg",
         "-y",
         "-loglevel", loglevel,
-        "-framerate", str(framerate),
         "-f", "concat",
-        "-safe", "0",  # Erlaubt unsichere Dateipfade
+        "-safe", "0",
         "-i", temp_file,
+        "-framerate", str(framerate),
         "-c:v", "libx264",
         "-crf", "30",
         "-b:v", "600k",
