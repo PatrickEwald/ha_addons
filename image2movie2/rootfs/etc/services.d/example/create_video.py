@@ -27,12 +27,13 @@ def create_video(framerate, inputpath, loglevel, revert):
     log(f"Array der Dateinamen erfolgreich in {output_json} gespeichert.")
     log(f"Anzahl der Frames (Bilder) für das Video: {len(filenames)}")
 
+    input_files = ' '.join([f"{inputpath}/{filename}" for filename in filenames])
     ffmpeg_command = [
         "ffmpeg",
         "-y",
         "-loglevel", loglevel,
         "-framerate", str(framerate),
-        "-i", f"{inputpath}/yourcamera_*.jpg",
+        "-i", f"concat:{input_files}",  # Nutze concat, um die Dateinamen zu übergeben
         "-c:v", "libx264",
         "-crf", "30",
         "-b:v", "600k",
@@ -45,8 +46,8 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-pix_fmt", "yuv420p"
     ]
 
-    if revert.lower() == 'true':
-        ffmpeg_command.extend(["-vf", "reverse"])
+    # if revert.lower() == 'true':
+    #     ffmpeg_command.extend(["-vf", "reverse"])
 
     ffmpeg_command.append(output_video)
 
