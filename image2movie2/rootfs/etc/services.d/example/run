@@ -1,7 +1,7 @@
 #!/usr/bin/with-contenv bashio
 
 # Setze Ausführungsrechte für das Skript
-chmod +x /config/scripts/run_create_video.sh
+chmod +x create_video.sh
 
 # Prüfe, ob Python und FFmpeg installiert sind
 if ! command -v python3 &> /dev/null || ! command -v ffmpeg &> /dev/null; then
