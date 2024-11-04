@@ -30,10 +30,12 @@ def create_video(framerate, inputpath, loglevel, revert):
         return
 
     # Temporäre Textdatei für die Eingabepfade erstellen
-    temp_file = "/media/input_files.txt"
+    temp_file = "/tmp/input_files.txt"  # Ändere den Pfad auf /tmp/
     with open(temp_file, 'w') as f:
         for filename in filenames:
             f.write(f"file '{inputpath}/{filename}'\n")
+
+    log(f"Inhalt der temporären Datei:\n{open(temp_file).read()}")  # Logge den Inhalt der temporären Datei
 
     # FFmpeg-Befehl erstellen
     ffmpeg_command = [
@@ -55,10 +57,6 @@ def create_video(framerate, inputpath, loglevel, revert):
         "-an",
         "-pix_fmt", "yuv420p"
     ]
-
-    # Wenn revert aktiviert ist, füge das Reverse-Flag hinzu
-    # if revert.lower() == 'true':
-    #     ffmpeg_command.extend(["-vf", "reverse"])
 
     ffmpeg_command.append(output_video)
 
