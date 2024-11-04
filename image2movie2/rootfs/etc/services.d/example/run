@@ -1,13 +1,39 @@
 #!/usr/bin/with-contenv bashio
 
-# Setze Ausführungsrechte für das Skript
-chmod +x create_video.sh
+# Funktion zur Fehlerprotokollierung und Konsolenausgabe
+log_error() {
+    bashio::log.error "$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') ERROR: $1" >&2
+}
 
-# Prüfe, ob Python und FFmpeg installiert sind
-if ! command -v python3 &> /dev/null || ! command -v ffmpeg &> /dev/null; then
-    bashio::log.error "Python3 oder FFmpeg sind nicht installiert. Installiere sie zuerst."
+log_info() {
+    bashio::log.info "$1"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') INFO: $1"
+}
+
+# Setze Ausführungsrechte für das Skript
+if chmod +x ./create_video.sh; then
+    log_info "Ausführungsrechte für create_video.sh erfolgreich gesetzt."
+else
+    log_error "Fehler beim Setzen der Ausführungsrechte für create_video.sh"
     exit 1
 fi
 
-# Starte das Python-Skript
-python3 create_video.py
+# Prüfe, ob Python3 und FFmpeg installiert sind
+if ! command -v python3 &> /dev/null; then
+    log_error "Python3 ist nicht installiert. Installiere es zuerst."
+    exit 1
+elif ! command -v ffmpeg &> /dev/null; then
+    log_error "FFmpeg ist nicht installiert. Installiere es zuerst."
+    exit 1
+else
+    log_info "Python3 und FFmpeg wurden gefunden."
+fi
+
+# Starte das Python-Skript und logge Ausgaben und Fehler in der Konsole
+log_info "Starte das Python-Skript create_video.py"
+if python3 ./create_video.py; then
+    log_info "Das Python-Skript wurde erfolgreich abgeschlossen."
+else
+    log_error "Fehler beim Ausführen des Python-Skripts."
+fi
