@@ -1,14 +1,13 @@
 # Datei: /config/scripts/create_video.py
 import os
+import sys
 import json
 import subprocess
 
 def log(message, level="INFO"):
-    # Einfache Log-Funktion
     print(f"{level}: {message}")
 
 def check_ffmpeg():
-    # Überprüfe, ob FFmpeg installiert ist
     try:
         result = subprocess.run(["which", "ffmpeg"], stdout=subprocess.PIPE, text=True)
         ffmpeg_path = result.stdout.strip()
@@ -19,16 +18,18 @@ def check_ffmpeg():
     except Exception as e:
         log(f"Fehler beim Überprüfen von FFmpeg: {e}", level="ERROR")
 
-def create_video():
-    # Verzeichnisse und Ausgabedateien
-    image_folder = '/media/growcamJPG'
+def create_video(framerate, inputpath, loglevel, revert):
     output_video = '/media/timelapse-webp.mp4'
     output_json = '/media/filenames.json'
 
     filenames = []
-    for filename in sorted(os.listdir(image_folder)):
+    for filename in sorted(os.listdir(inputpath)):
         if filename.endswith(".jpg") and filename.startswith("yourcamera_"):
             filenames.append(filename)
+
+    # Wenn revert aktiviert ist, kehre die Reihenfolge der Dateinamen um
+    if revert.lower() == 'true':
+        filenames.reverse()
 
     # Speichere die Dateinamen in einer JSON-Datei
     with open(output_json, 'w') as json_file:
@@ -37,25 +38,45 @@ def create_video():
     log(f"Array der Dateinamen erfolgreich in {output_json} gespeichert.")
     log(f"Anzahl der Frames (Bilder) für das Video: {len(filenames)}")
 
+    # Erstelle den FFmpeg-Befehl
+    ffmpeg_command = [
+        "ffmpeg",
+        "-loglevel", loglevel,         # FFmpeg-Loglevel setzen
+        "-pattern_type", "glob",
+        "-framerate", str(framerate),
+        "-i", f"{inputpath}/yourcamera_*.jpg",
+        "-vcodec", "libx264",
+        "-crf", "23",
+        "-pix_fmt", "yuv420p",
+        "-profile:v", "baseline",
+        "-level", "3.0",
+        "-movflags", "+faststart",
+        output_video
+    ]
+
+    # Wenn revert aktiviert ist, füge das Reverse-Flag hinzu
+    if revert.lower() == 'true':
+        ffmpeg_command.insert(1, "-vf")
+        ffmpeg_command.insert(2, "reverse")
+
     try:
-        subprocess.run([
-            "ffmpeg",
-            "-pattern_type", "glob",
-            "-framerate", "25",
-            "-i", f"{image_folder}/yourcamera_*.jpg",
-            "-vcodec", "libx264",
-            "-crf", "23",
-            "-pix_fmt", "yuv420p",
-            "-profile:v", "baseline",
-            "-level", "3.0",
-            "-movflags", "+faststart",
-            output_video
-        ], check=True)
+        subprocess.run(ffmpeg_command, check=True)
         log(f"Video erfolgreich erstellt: {output_video}")
     except subprocess.CalledProcessError as e:
         log(f"Fehler beim Erstellen des Videos: {e}", level="ERROR")
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 5:
+        log("Fehlende Argumente. Erwartet: framerate, inputpath, loglevel, revert", level="ERROR")
+        sys.exit(1)
+
+    # Argumente auslesen
+    framerate = sys.argv[1]
+    inputpath = sys.argv[2]
+    loglevel = sys.argv[3]
+    revert = sys.argv[4]
+
+    # FFmpeg prüfen und Video erstellen
     check_ffmpeg()
-    create_video()
+    create_video(framerate, inputpath, loglevel, revert)

@@ -1,5 +1,16 @@
 #!/usr/bin/with-contenv bashio
 
+declare framerate
+declare inputpath
+declare loglevel
+declare revert
+
+# Konfiguration auslesen
+framerate=$(bashio::config 'framerate')
+inputpath=$(bashio::config 'inputpath')
+loglevel=$(bashio::config 'loglevel')
+revert=$(bashio::config 'revert')
+
 # Verzeichnis des Skripts ermitteln
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -9,21 +20,6 @@ chmod +x "$SCRIPT_DIR/create_video.py" || {
     exit 1
 }
 
-# Prüfe, ob Python3 und FFmpeg installiert sind
-if ! command -v python3 &> /dev/null; then
-    bashio::log.error "Python3 ist nicht installiert. Installiere es zuerst."
-    exit 1
-elif ! command -v ffmpeg &> /dev/null; then
-    bashio::log.error "FFmpeg ist nicht installiert. Installiere es zuerst."
-    exit 1
-else
-    bashio::log.info "Python3 und FFmpeg wurden gefunden."
-fi
-
-# Starte das Python-Skript im selben Verzeichnis und logge Ausgaben
-bashio::log.info "Starte das Python-Skript $SCRIPT_DIR/create_video.py"
-if python3 "$SCRIPT_DIR/create_video.py"; then
-    bashio::log.info "Das Python-Skript wurde erfolgreich abgeschlossen."
-else
-    bashio::log.error "Fehler beim Ausführen des Python-Skripts."
-fi
+# Starte das Python-Skript mit den übergebenen Argumenten und verwende $SCRIPT_DIR
+bashio::log.info "Starte das Python-Skript $SCRIPT_DIR/create_video.py mit übergebenen Konfigurationswerten"
+python3 "$SCRIPT_DIR/create_video.py" "$framerate" "$inputpath" "$loglevel" "$revert"
