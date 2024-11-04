@@ -48,7 +48,8 @@ fi
 # Prüfen, ob die Bilder im Verzeichnis fehlerfrei sind
 bashio::log.info "Überprüfe Bilder auf Fehler..."
 for img in "$inputpath"/*.jpg; do
-    ffmpeg -v error -i "$img" -f null - || {
+    bashio::log.info "Überprüfe Bild: $img"
+    ffmpeg -v error -i "$img" -f null - 2>&1 | tee -a /media/ffmpeg_errors.log || {
         bashio::log.error "Fehler in Bild: $img"
         echo "Fehler in Bild: $img"
     }
