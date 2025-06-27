@@ -1,0 +1,28 @@
+# https://developers.home-assistant.io/docs/add-ons/configuration#add-on-config
+name: Image2Movie2
+version: "1.1.1"
+slug: image2movie2
+description: Image2Movie - erzeugt ein .mp4 Video aus jpeg Bildern
+url: "https://github.com/PatrickEwald/ha_addons/tree/main/example"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+init: false
+map:
+  - media:rw
+options:
+  inputpath: "/media"
+  framerate: 25
+  loglevel: "error"
+  imageFormat: ".jpg"
+  revert: false
+schema:
+  inputpath: "str"
+  framerate: "int"
+  loglevel: "list(quiet|panic|fatal|error|warning|info|verbose|debug)"
+  imageFormat: "str"
+  revert: "bool"
+

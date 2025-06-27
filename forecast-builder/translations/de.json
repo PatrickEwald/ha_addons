@@ -1,0 +1,13 @@
+{
+  "config": {
+    "script_path": {
+      "name": "Pfad zum Skript",
+      "description": "Pfad des Python-Skripts, das ausgeführt werden soll."
+    },
+    "requirements": {
+      "name": "pip-Pakete",
+      "description": "Liste der zu installierenden Python-Pakete."
+    }
+  },
+  "title": "Python Runner"
+}
