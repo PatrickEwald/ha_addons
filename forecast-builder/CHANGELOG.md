@@ -18,3 +18,9 @@
 
 - YAML-Syntaxfehler in den InfluxDB-Credentials korrigiert
 - Korrekte Übernahme der Zugangsdaten aus der Konfiguration
+
+## [1.0.2] - 2025-06-27
+
+### Hinzugefügt
+
+- day-night interval scheduling and improve logging
