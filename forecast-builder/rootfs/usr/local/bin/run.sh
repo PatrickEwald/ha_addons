@@ -1,36 +1,34 @@
 #!/usr/bin/env bash
 set -euo pipefail
-IFS=$'\n\t'        
+IFS=$'\n'
 
 readonly NIGHT_INTERVAL=3600
 
-DAY_INTERVAL=$(jq -re '.interval // 300' /data/options.json)
-[[ $DAY_INTERVAL =~ ^[0-9]+$ ]] || DAY_INTERVAL=300
+log() { printf '%s %s\n' "$(date '+%F %T')" "$*"; }
 
-log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
+get_day_interval() {
+    local val
+    val=$(jq -er '.interval // 300' /data/options.json 2>/dev/null || echo 300)
+    [[ $val =~ ^[0-9]+$ ]] || val=300
+    echo "$val"
+}
 
-log "Starte Forecast Runner – Tagintervall ${DAY_INTERVAL}s, Nachtintervall ${NIGHT_INTERVAL}s"
+trap 'log "⏹️  Beende Skript"; kill 0' SIGINT SIGTERM
 
-trap 'log "⏹️  Beende Skript"; exit 0' SIGINT SIGTERM
-
-while :; do
-    current_hour=$((10#$(date +%H))) 
-
-    if (( current_hour >= 6 && current_hour < 22 )); then
-        DAY_INTERVAL=$(jq -re '.interval // 300' /data/options.json)
-        [[ $DAY_INTERVAL =~ ^[0-9]+$ ]] || DAY_INTERVAL=300
-        INTERVAL=$DAY_INTERVAL
-        log "🌞 Tagbetrieb – starte Forecast (Intervall ${INTERVAL}s)"
+while true; do
+    current_hour=$(date +%H)
+    if (( 10#$current_hour >= 6 && 10#$current_hour < 22 )); then
+        INTERVAL=$(get_day_interval)
+        log "🌞 generiere Forecast (Intervall ${INTERVAL}s)"
+        if python3 -u /opt/forecast/forecastOP.py; then
+            log "✅ Forecast fertig – warte ${INTERVAL}s"
+        else
+            rc=$?
+            log "❌ Forecast fehlgeschlagen (Exit-Code $rc)"
+        fi
     else
         INTERVAL=$NIGHT_INTERVAL
-        log "🌙 Nachtbetrieb – starte Forecast (Intervall ${INTERVAL}s)"
-    fi
-
-    if python3 -u /opt/forecast/forecastOP.py; then
-        log "✅ Forecast fertig – warte ${INTERVAL}s"
-    else
-        rc=$?
-        log "❌ Forecast fehlgeschlagen (Exit-Code $rc)"
+        log "🌙 Nachtbetrieb – kein Forecast, warte ${INTERVAL}s"
     fi
 
     sleep "$INTERVAL" & wait $!

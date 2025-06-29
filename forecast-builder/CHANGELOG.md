@@ -24,3 +24,9 @@
 ### Hinzugefügt
 
 - day-night interval scheduling and improve logging
+
+## [1.0.3] - 2025-06-27
+
+### Behoben
+
+- refactor(forecast-runner): improve interval handling and logging
