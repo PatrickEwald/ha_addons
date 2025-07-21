@@ -1,6 +1,6 @@
 {
   "name": "Time Machine Server",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "slug": "timemachine",
   "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
   "arch": ["amd64", "aarch64", "armv7"],
@@ -17,7 +17,6 @@
   "host_network": true,
   "privileged": ["NET_ADMIN"],
   "usb": true,
-  "image": "ghcr.io/home-assistant/{arch}-addon-base",
   "build_from": {
     "amd64": "ghcr.io/home-assistant/amd64-base:latest",
     "aarch64": "ghcr.io/home-assistant/aarch64-base:latest",
