@@ -1,0 +1,26 @@
+{
+  "name": "mbb",
+  "version": "1.0.0",
+  "slug": "mbb",
+  "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
+  "arch": ["amd64", "aarch64", "armv7"],
+  "startup": "services",
+  "boot": "auto",
+  "options": {
+    "username": "patrick",
+    "password": "test"
+  },
+  "schema": {
+    "username": "str",
+    "password": "str"
+  },
+  "host_network": true,
+  "privileged": ["SYS_ADMIN"],
+  "usb": true,
+  "full_access": true,
+  "init": true,
+  "stage": "experimental",
+  "ingress": false,
+  "panel_icon": "mdi:apple",
+  "panel_title": "mbb"
+}
