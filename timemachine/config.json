@@ -1,6 +1,6 @@
 {
   "name": "Time Machine Server",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "slug": "timemachine",
   "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
   "arch": ["amd64", "aarch64", "armv7"],
@@ -18,7 +18,7 @@
   "privileged": ["SYS_ADMIN"],
   "usb": true,
   "full_access": false,
-  "init": false,
+  "init": true,
   "stage": "experimental",
   "ingress": false,
   "panel_icon": "mdi:apple",
