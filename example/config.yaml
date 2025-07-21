@@ -1,5 +1,5 @@
 name: Example add-on
-version: "1.2.2"
+version: "1.2.3"
 slug: example
 description: Example add-on
 url: "https://github.com/PatrickEwald/ha_addons/tree/main/example"
@@ -20,4 +20,4 @@ schema:
   message: "str?"
   username: "str"
   password: "str"
-#image: "ghcr.io/home-assistant/{arch}-addon-example"
+image: "ghcr.io/home-assistant/{arch}-addon-example"
