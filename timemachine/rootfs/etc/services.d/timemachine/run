@@ -1,2 +1,2 @@
 #!/usr/bin/with-contenv bash
-exec /usr/local/bin/entrypoint.sh
+/usr/local/bin/entrypoint.sh

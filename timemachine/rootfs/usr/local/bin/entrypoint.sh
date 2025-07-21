@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 USERNAME=$(jq -r '.username' /data/options.json)
 PASSWORD=$(jq -r '.password' /data/options.json)
 
@@ -15,4 +17,6 @@ chown "$USERNAME:$USERNAME" /share/timemachine
 avahi-daemon --daemonize
 
 # Samba starten
-exec smbd --foreground --no-process-group
+smbd --foreground --no-process-group &
+
+tail -f /dev/null
