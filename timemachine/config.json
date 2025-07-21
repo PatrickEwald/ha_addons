@@ -1,6 +1,6 @@
 {
   "name": "Time Machine Server",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "slug": "timemachine",
   "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
   "arch": ["amd64", "aarch64", "armv7"],
