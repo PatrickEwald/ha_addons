@@ -20,7 +20,9 @@ schema:
   message: "str?"
   username: "str"
   password: "str"
-
+privileged:
+  - SYS_ADMIN
+  - NET_ADMIN
 build_from:
   amd64: "ghcr.io/hassio-addons/base:14.1.1"
   aarch64: "ghcr.io/hassio-addons/base:14.1.1"
