@@ -1,4 +1,4 @@
-FROM ghcr.io/home-assistant/amd64-base:latest
+FROM ghcr.io/hassio-addons/base:14.1.1
 
 ENV LANG="C.UTF-8"
 
