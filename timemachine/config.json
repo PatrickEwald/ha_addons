@@ -1,6 +1,6 @@
 {
   "name": "Time Machine Server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "slug": "timemachine",
   "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
   "url": "https://github.com/PatrickEwald/ha_addons/tree/main/timemachine",

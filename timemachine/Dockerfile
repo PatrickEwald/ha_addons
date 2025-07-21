@@ -3,13 +3,11 @@ FROM $BUILD_FROM
 
 ENV LANG="C.UTF-8"
 
-# Installiere benötigte Pakete
+# Install Pakete
 RUN apk add --no-cache samba samba-common-tools avahi jq
 
-# Kopiere Startskript und Samba-Konfiguration
-COPY run.sh /run.sh
-COPY smb.conf /etc/samba/smb.conf
+# Kopiere rootfs
+COPY rootfs/ /
 
-RUN chmod +x /run.sh
-
-CMD [ "/run.sh" ]
+RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /etc/services.d/timemachine/run

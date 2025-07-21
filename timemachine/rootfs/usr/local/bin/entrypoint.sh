@@ -1,16 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
 USERNAME=$(jq -r '.username' /data/options.json)
 PASSWORD=$(jq -r '.password' /data/options.json)
 
+# Benutzer anlegen
 adduser -D -H -s /bin/false "$USERNAME"
 echo "$USERNAME:$PASSWORD" | chpasswd
 
+# Ordner sicherstellen
 mkdir -p /share/timemachine
-chown "$USERNAME":"$USERNAME" /share/timemachine
+chown "$USERNAME:$USERNAME" /share/timemachine
 
-# Avahi für Bonjour-Zugriff (Time Machine erkennt das automatisch)
+# Avahi starten (für Bonjour/Time Machine Detection)
 avahi-daemon --daemonize
 
-# Start SMB
-smbd --foreground --no-process-group
+# Samba starten
+exec smbd --foreground --no-process-group
