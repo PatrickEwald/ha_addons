@@ -1,6 +1,6 @@
 {
   "name": "Time Machine Server",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "slug": "timemachine",
   "description": "Time Machine-kompatibler SMB-Server für macOS-Backups",
   "arch": ["amd64", "aarch64", "armv7"],
@@ -8,15 +8,21 @@
   "boot": "auto",
   "options": {
     "username": "patrick",
-    "password": "geheim"
+    "password": "test"
   },
   "schema": {
     "username": "str",
     "password": "str"
   },
   "host_network": true,
-  "privileged": ["NET_ADMIN"],
+  "privileged": ["SYS_ADMIN"],
   "usb": true,
+  "full_access": false,
+  "init": false,
+  "stage": "experimental",
+  "ingress": false,
+  "panel_icon": "mdi:apple",
+  "panel_title": "Time Machine",
   "build_from": {
     "amd64": "ghcr.io/hassio-addons/base:14.1.1"
   }
