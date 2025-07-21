@@ -2,11 +2,9 @@
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Execute during the build of the image
-ARG TEMPIO_VERSION BUILD_ARCH
-RUN \
-    curl -sSLf -o /usr/bin/tempio \
-    "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${BUILD_ARCH}"
+RUN apk add --no-cache samba samba-common-tools avahi jq
 
-# Copy root filesystem
-COPY rootfs /
+COPY rootfs/ /
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /etc/services.d/timemachine/run
