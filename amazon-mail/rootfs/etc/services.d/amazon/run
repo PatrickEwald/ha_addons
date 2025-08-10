@@ -1,17 +1,34 @@
 #!/usr/bin/with-contenv sh
-set -ex
+set -e
 
-echo "== RUN start =="
-date
-echo "PWD: $(pwd)"
-echo "Listing /app:"
-ls -la /app || true
-echo "Python version:"
-python3 -V || true
+# Standard-Intervall: 4h (14400s), via Option überschreibbar
+POLL_INTERVAL="$(bashio::config 'POLL_INTERVAL' 2>/dev/null || echo 14400)"
 
 while true; do
-  echo "Invoking python..."
-  python3 -u /app/amazon.py 2>&1 | tee -a /data/amazon.log || echo "python exit code: $?"
-  echo "Sleeping 30s..."
-  sleep 30
+  # Add-on Optionen ins ENV übernehmen (falls gesetzt)
+  IMAP_SERVER="$(bashio::config 'IMAP_SERVER' 2>/dev/null || true)"
+  EMAIL_USER="$(bashio::config 'EMAIL_USER' 2>/dev/null || true)"
+  EMAIL_PASS="$(bashio::config 'EMAIL_PASS' 2>/dev/null || true)"
+  ANZAHL_MAILS="$(bashio::config 'ANZAHL_MAILS' 2>/dev/null || true)"
+  DEBUG_OPT="$(bashio::config 'DEBUG' 2>/dev/null || true)"
+
+  [ -n "$IMAP_SERVER" ] && export IMAP_SERVER
+  [ -n "$EMAIL_USER"  ] && export EMAIL_USER
+  [ -n "$EMAIL_PASS"  ] && export EMAIL_PASS
+  [ -n "$ANZAHL_MAILS" ] && export ANZAHL_MAILS
+  [ -n "$DEBUG_OPT" ] && export DEBUG="$DEBUG_OPT"
+
+  mkdir -p /media/amazon-mail
+
+  echo "[$(date -Iseconds)] Starte amazon.py ..."
+  # Ausgabe: ins Protokoll UND nach /data/last.json
+  # (letzte Ausgabe bleibt als Datei verfügbar)
+  if python3 -u /app/amazon.py 2>&1 | tee /media/amazon-mail/last.json; then
+    echo "[$(date -Iseconds)] Fertig."
+  else
+    echo "[$(date -Iseconds)] FEHLER beim Ausführen von amazon.py" >&2
+  fi
+
+  echo "[$(date -Iseconds)] Schlafe ${POLL_INTERVAL}s ..."
+  sleep "$POLL_INTERVAL"
 done

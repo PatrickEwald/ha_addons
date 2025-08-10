@@ -1,14 +1,28 @@
 {
   "name": "Amazon Mail",
-  "version": "0.0.5",
+  "version": "1.0.0",
   "slug": "amazon-mail",
-  "description": "Probe-Add-on, das nur prüft, ob amazon.py ausgeführt wird und Logs zeigt.",
+  "description": "Liest Amazon-Mails und gibt JSON aus",
   "arch": ["amd64", "aarch64", "armv7"],
   "startup": "services",
   "boot": "auto",
-  "options": {},
-  "schema": {},
-  "ingress": false,
+  "options": {
+    "IMAP_SERVER": "imap.ionos.de",
+    "EMAIL_USER": "amazon-pakete@patrick-ewald.de",
+    "EMAIL_PASS": "dein-pass",
+    "ANZAHL_MAILS": 20,
+    "DEBUG": false,
+    "POLL_INTERVAL": 14400
+  },
+  "schema": {
+    "IMAP_SERVER": "str",
+    "EMAIL_USER": "str",
+    "EMAIL_PASS": "str",
+    "ANZAHL_MAILS": "int",
+    "DEBUG": "bool?",
+    "POLL_INTERVAL": "int?"
+  },
   "init": false,
-  "map": ["data:rw"]
+  "ingress": false,
+  "map": ["media:rw"]
 }
