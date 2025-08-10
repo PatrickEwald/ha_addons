@@ -1,8 +1,9 @@
-# Verwende das Home Assistant Base-Image für die entsprechende Architektur
-FROM ghcr.io/home-assistant/amd64-base:latest
+ARG BUILD_FROM
+FROM ${BUILD_FROM}
 
-RUN apk add --no-cache python3 py3-pip
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+RUN apk add --no-cache python3
+
 COPY app /app
-RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY rootfs/ /
+
+RUN chmod +x /etc/services.d/amazon/run

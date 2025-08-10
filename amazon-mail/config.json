@@ -1,31 +1,14 @@
 {
-  "name": "amazon-mail",
-  "version": "0.0.4",
+  "name": "Amazon Mail",
+  "version": "0.0.5",
   "slug": "amazon-mail",
-  "description": "Ruft Amazon Mails ab",
+  "description": "Probe-Add-on, das nur prüft, ob amazon.py ausgeführt wird und Logs zeigt.",
   "arch": ["amd64", "aarch64", "armv7"],
-  "startup": "once",
+  "startup": "services",
   "boot": "auto",
-  "options": {
-    "IMAP_SERVER": "imap.ionos.de",
-    "EMAIL_USER": "amazon-pakete@patrick-ewald.de",
-    "EMAIL_PASS": "test",
-    "ANZAHL_MAILS": 20
-  },
-  "schema": {
-    "IMAP_SERVER": "str",
-    "EMAIL_USER": "str",
-    "EMAIL_PASS": "str",
-    "ANZAHL_MAILS": "int",
-    "DEBUG": "bool?"
-  },
-  "host_network": true,
-  "full_access": true,
-  "homeassistant_api": true,
-  "stage": "experimental",
-  "init": false,
+  "options": {},
+  "schema": {},
   "ingress": false,
-  "panel_icon": "mdi:email-outline",
-  "panel_title": "Amazon Mail",
-  "map": ["media:rw"]
+  "init": false,
+  "map": ["data:rw"]
 }
