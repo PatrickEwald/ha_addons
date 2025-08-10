@@ -1,6 +1,6 @@
 {
   "name": "Amazon Mail",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "slug": "amazon-mail",
   "description": "Liest Amazon-Mails und gibt JSON aus",
   "arch": ["amd64", "aarch64", "armv7"],

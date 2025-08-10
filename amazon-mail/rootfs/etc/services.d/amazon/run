@@ -1,34 +1,41 @@
-#!/usr/bin/with-contenv sh
-set -e
+#!/usr/bin/with-contenv bashio
+set -euo pipefail
 
-# Standard-Intervall: 4h (14400s), via Option überschreibbar
+# Werte aus der Add-on-Konfiguration lesen
+IMAP_SERVER="$(bashio::config 'IMAP_SERVER')"
+EMAIL_USER="$(bashio::config 'EMAIL_USER')"
+EMAIL_PASS="$(bashio::config 'EMAIL_PASS')"
+ANZAHL_MAILS="$(bashio::config 'ANZAHL_MAILS')"
+DEBUG_VAL="$(bashio::config 'DEBUG' 2>/dev/null || echo false)"
 POLL_INTERVAL="$(bashio::config 'POLL_INTERVAL' 2>/dev/null || echo 14400)"
 
+# Validierung
+if [ -z "${EMAIL_USER}" ] || [ -z "${EMAIL_PASS}" ]; then
+  bashio::log.fatal "EMAIL_USER/EMAIL_PASS nicht gesetzt. Bitte im Add-on → Konfiguration eintragen und speichern."
+  exit 1
+fi
+if [ -z "${IMAP_SERVER}" ]; then
+  bashio::log.fatal "IMAP_SERVER nicht gesetzt."
+  exit 1
+fi
+
+# Maskiert loggen
+MASKED_PASS="******"
+bashio::log.info "Konfig: IMAP_SERVER=${IMAP_SERVER}, EMAIL_USER=${EMAIL_USER}, ANZAHL_MAILS=${ANZAHL_MAILS}, DEBUG=${DEBUG_VAL}, POLL_INTERVAL=${POLL_INTERVAL}"
+
+# Für das Python-Skript exportieren
+export IMAP_SERVER EMAIL_USER EMAIL_PASS ANZAHL_MAILS DEBUG="${DEBUG_VAL}"
+
+mkdir -p /data
+
+# Loop, damit Logs sichtbar bleiben und Ergebnis persistiert
 while true; do
-  # Add-on Optionen ins ENV übernehmen (falls gesetzt)
-  IMAP_SERVER="$(bashio::config 'IMAP_SERVER' 2>/dev/null || true)"
-  EMAIL_USER="$(bashio::config 'EMAIL_USER' 2>/dev/null || true)"
-  EMAIL_PASS="$(bashio::config 'EMAIL_PASS' 2>/dev/null || true)"
-  ANZAHL_MAILS="$(bashio::config 'ANZAHL_MAILS' 2>/dev/null || true)"
-  DEBUG_OPT="$(bashio::config 'DEBUG' 2>/dev/null || true)"
-
-  [ -n "$IMAP_SERVER" ] && export IMAP_SERVER
-  [ -n "$EMAIL_USER"  ] && export EMAIL_USER
-  [ -n "$EMAIL_PASS"  ] && export EMAIL_PASS
-  [ -n "$ANZAHL_MAILS" ] && export ANZAHL_MAILS
-  [ -n "$DEBUG_OPT" ] && export DEBUG="$DEBUG_OPT"
-
-  mkdir -p /media/amazon-mail
-
-  echo "[$(date -Iseconds)] Starte amazon.py ..."
-  # Ausgabe: ins Protokoll UND nach /data/last.json
-  # (letzte Ausgabe bleibt als Datei verfügbar)
-  if python3 -u /app/amazon.py 2>&1 | tee /media/amazon-mail/last.json; then
-    echo "[$(date -Iseconds)] Fertig."
+  bashio::log.info "Starte amazon.py ..."
+  if python3 -u /app/amazon.py 2>&1 | tee /data/last.json; then
+    bashio::log.info "amazon.py fertig."
   else
-    echo "[$(date -Iseconds)] FEHLER beim Ausführen von amazon.py" >&2
+    bashio::log.error "Fehler beim Ausführen von amazon.py"
   fi
-
-  echo "[$(date -Iseconds)] Schlafe ${POLL_INTERVAL}s ..."
-  sleep "$POLL_INTERVAL"
+  bashio::log.info "Warte ${POLL_INTERVAL}s bis zum nächsten Lauf ..."
+  sleep "${POLL_INTERVAL}"
 done
