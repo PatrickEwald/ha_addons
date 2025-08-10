@@ -1,10 +1,10 @@
 {
   "name": "amazon-mail",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "slug": "amazon-mail",
   "description": "Ruft Amazon Mails ab",
   "arch": ["amd64", "aarch64", "armv7"],
-  "startup": "services",
+  "startup": "once",
   "boot": "auto",
   "options": {
     "IMAP_SERVER": "imap.ionos.de",
@@ -27,5 +27,5 @@
   "ingress": false,
   "panel_icon": "mdi:email-outline",
   "panel_title": "Amazon Mail",
-  "map": ["data:rw"]
+  "map": ["media:rw"]
 }
