@@ -1,6 +1,6 @@
 {
   "name": "amazon-mail",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "slug": "amazon-mail",
   "description": "Ruft Amazon Mails ab",
   "arch": ["amd64", "aarch64", "armv7"],

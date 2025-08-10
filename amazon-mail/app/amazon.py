@@ -23,7 +23,7 @@ EMAIL_PASS = os.getenv("EMAIL_PASS", "")
 SUCHWÖRTER = ["Zustellung heute", "In Zustellung"]  # Suchbegriffe
 ANZAHL_MAILS = int(os.getenv("ANZAHL_MAILS", "20"))  # Anzahl der letzten Mails, die geprüft werden sollen
 # Debug-Flag
-DEBUG = os.getenv("DEBUG", "0") in ("1", "true", "True")
+DEBUG = os.getenv("DEBUG", "1") in ("1", "true", "True")
 
 # Optional: Presets für gängige Provider via IMAP_PRESET ("gmail", "gmx", "ionos", "outlook")
 PRESET_SERVER = {

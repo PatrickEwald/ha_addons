@@ -14,3 +14,4 @@ fi
 mkdir -p /data
 # Skript starten; letztes Ergebnis auch in /data/last.json ablegen
 python3 /app/amazon.py | tee /data/last.json
+sleep 60
