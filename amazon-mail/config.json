@@ -1,7 +1,7 @@
 {
-  "name": "amazonMail",
+  "name": "amazon-mail",
   "version": "0.0.0",
-  "slug": "amazonMail",
+  "slug": "amazon-mail",
   "description": "Ruft Amazon Mails ab",
   "arch": ["amd64", "aarch64", "armv7"],
   "startup": "services",
