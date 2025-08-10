@@ -1,0 +1,16 @@
+#!/usr/bin/with-contenv bashio
+set -euo pipefail
+
+# Optionen aus config.json -> Env
+export IMAP_SERVER="$(bashio::config 'IMAP_SERVER')"
+export EMAIL_USER="$(bashio::config 'EMAIL_USER')"
+export EMAIL_PASS="$(bashio::config 'EMAIL_PASS')"
+export ANZAHL_MAILS="$(bashio::config 'ANZAHL_MAILS')"
+# Optionales Debug-Flag (wenn du es in schema aufnimmst)
+if bashio::config.has_value 'DEBUG'; then
+  export DEBUG="$(bashio::config 'DEBUG')"
+fi
+
+mkdir -p /data
+# Skript starten; letztes Ergebnis auch in /data/last.json ablegen
+python3 /app/amazon.py | tee /data/last.json
