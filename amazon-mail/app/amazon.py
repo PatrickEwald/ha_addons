@@ -278,6 +278,45 @@ def main():
             f = decode_mime_words(hdr.get("From", ""))
             print(f"[DEBUG] From={f} | Subject={s}")
 
+    # ---- Nachbearbeitung: bereits zugestellte Bestellungen aus "zustellung_heute" entfernen + Duplikate bereinigen ----
+    try:
+        # Set aller zugestellten Bestellnummern (nur mit vorhandener order_number)
+        delivered_orders = {
+            r.get("order_number") for r in results.get("zugestellt", []) if r.get("order_number")
+        }
+
+        if delivered_orders:
+            before_len = len(results.get("zustellung_heute", []))
+            results["zustellung_heute"] = [
+                r for r in results.get("zustellung_heute", [])
+                if r.get("order_number") not in delivered_orders
+            ]
+            if DEBUG:
+                print(f"[DEBUG] ZustellungHeute: {before_len - len(results['zustellung_heute'])} Einträge entfernt (bereits zugestellt)")
+
+        def _dedupe(records, key_fields):
+            seen = set()
+            out = []
+            for rec in records:
+                key = tuple(rec.get(k) for k in key_fields)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(rec)
+            return out
+
+        # Duplikate entfernen (auf sinnvollen Schlüsseln)
+        results["zustellung_heute"] = _dedupe(
+            results.get("zustellung_heute", []),
+            ["order_number", "subject", "date", "time_window"],
+        )
+        results["zugestellt"] = _dedupe(
+            results.get("zugestellt", []),
+            ["order_number", "subject", "date"],
+        )
+    except Exception as e:
+        print(f"[WARN] Nachbearbeitung fehlgeschlagen: {e}")
+
     # ---- Ergebnisse auch als Datei ablegen, damit Home Assistant sie lesen kann ----
     try:
         # atomar schreiben: zuerst temp-Datei, dann umbenennen
