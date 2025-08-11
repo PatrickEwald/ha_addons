@@ -22,8 +22,12 @@ EMAIL_USER = os.getenv("EMAIL_USER", "")
 EMAIL_PASS = os.getenv("EMAIL_PASS", "")
 SUCHWÖRTER = ["Zustellung heute", "In Zustellung"]  # Suchbegriffe
 ANZAHL_MAILS = int(os.getenv("ANZAHL_MAILS", "20"))  # Anzahl der letzten Mails, die geprüft werden sollen
+
 # Debug-Flag
 DEBUG = os.getenv("DEBUG", "0") in ("1", "true", "True")
+
+# Output JSON path for results
+OUTPUT_JSON = os.getenv("OUTPUT_JSON", "/share/amazon_status.json")
 
 # Optional: Presets für gängige Provider via IMAP_PRESET ("gmail", "gmx", "ionos", "outlook")
 PRESET_SERVER = {
@@ -274,6 +278,19 @@ def main():
             f = decode_mime_words(hdr.get("From", ""))
             print(f"[DEBUG] From={f} | Subject={s}")
 
+    # ---- Ergebnisse auch als Datei ablegen, damit Home Assistant sie lesen kann ----
+    try:
+        # atomar schreiben: zuerst temp-Datei, dann umbenennen
+        _tmp_path = OUTPUT_JSON + ".tmp"
+        with open(_tmp_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        os.replace(_tmp_path, OUTPUT_JSON)
+        if DEBUG:
+            print(f"[DEBUG] Ergebnisse nach {OUTPUT_JSON} geschrieben")
+    except Exception as e:
+        print(f"[WARN] Konnte Ergebnisse nicht nach {OUTPUT_JSON} schreiben: {e}")
+
+    # Für Log/Debug weiterhin auf STDOUT ausgeben
     print(json.dumps(results, ensure_ascii=False, indent=2))
     mail.logout()
 
