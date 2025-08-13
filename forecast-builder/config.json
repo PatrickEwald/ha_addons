@@ -1,10 +1,12 @@
 {
   "name": "Forecast Builder",
-  "version": "1.0.30",
+  "version": "1.0.31",
   "slug": "forecast_builder",
   "options": {
     "use_temperature": false,
     "use_bridge_day": false,
+    "use_rolling": false,
+    "use_trends": false,
     "use_lags": false,
     "interval": 300,
     "influx_user": "",
@@ -13,6 +15,8 @@
   "schema": {
     "use_temperature": "bool",
     "use_bridge_day": "bool",
+    "use_rolling": "bool",
+    "use_trends": "bool",
     "use_lags": "bool",
     "interval": "int",
     "influx_user": "str",

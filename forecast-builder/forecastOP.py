@@ -65,6 +65,8 @@ SELECT mean("value") FROM "autogen"."°C"
         "use_lags": False,
         "use_bridge_day": False,
         "use_temperature": False,
+        "use_rolling": False,  # NEU: Rolling Window Features
+        "use_trends": False,   # NEU: Trend Features
     },
     # Ziel-Messung in InfluxDB
     "out_measurement": "forecast_ff",
@@ -80,8 +82,8 @@ def load_addon_config():
     with open(options_path, "r") as f:
         options = json.load(f)
 
-    # Feature Flags setzen
-    for key in ["use_temperature", "use_bridge_day", "use_lags"]:
+    # Feature Flags setzen (erweitert um neue Features)
+    for key in ["use_temperature", "use_bridge_day", "use_lags", "use_rolling", "use_trends"]:
         if key in options and isinstance(options[key], bool):
             CONFIG["features"][key] = options[key]
 
@@ -121,14 +123,20 @@ def influx_query(q: str) -> pd.DataFrame:
 # Feature Engineering
 # ────────────────────────────────────
 def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Erweiterte Feature-Engineering Funktion"""
     df = df.copy()
+    
+    # Basis Zeit-Features (wie vorher)
     df["dow"] = df["ds"].dt.dayofweek
-    df["time_minutes"] = df["ds"].dt.hour * 60 + df["ds"].dt.minute
+    df["hour"] = df["ds"].dt.hour
+    df["time_minutes"] = df["hour"] * 60 + df["ds"].dt.minute
     df["sin_time"] = np.sin(2 * np.pi * df["time_minutes"] / (24 * 60))
     df["cos_time"] = np.cos(2 * np.pi * df["time_minutes"] / (24 * 60))
     df["sin_dow"] = np.sin(2 * np.pi * df["dow"] / 7)
     df["cos_dow"] = np.cos(2 * np.pi * df["dow"] / 7)
     df["is_holiday"] = df["ds"].dt.date.isin(holidays.Germany()).astype(int)
+    
+    # Bridge Day Feature (wie vorher)
     if CONFIG["features"]["use_bridge_day"]:
         prev = df["ds"].dt.date - pd.Timedelta(days=1)
         next_ = df["ds"].dt.date + pd.Timedelta(days=1)
@@ -136,61 +144,242 @@ def add_time_features(df: pd.DataFrame) -> pd.DataFrame:
             ((df["dow"] == 4) & prev.isin(holidays.Germany())) |
             ((df["dow"] == 0) & next_.isin(holidays.Germany()))
         ).astype(int)
+    
+    # *** NEUE ERWEITERTE FEATURES ***
+    
+    # Erweiterte Zeit-Features
+    df["is_weekend"] = (df["dow"] >= 5).astype(int)
+    df["is_monday"] = (df["dow"] == 0).astype(int)
+    df["is_friday"] = (df["dow"] == 4).astype(int)
+    
+    # Tageszeit-Kategorien
+    df["is_early_morning"] = ((df["hour"] >= 6) & (df["hour"] < 9)).astype(int)
+    df["is_morning"] = ((df["hour"] >= 9) & (df["hour"] < 12)).astype(int)
+    df["is_lunch"] = ((df["hour"] >= 12) & (df["hour"] < 14)).astype(int)
+    df["is_afternoon"] = ((df["hour"] >= 14) & (df["hour"] < 17)).astype(int)
+    df["is_evening"] = ((df["hour"] >= 17) & (df["hour"] < 20)).astype(int)
+    df["is_late"] = ((df["hour"] >= 20)).astype(int)
+    
+    return df
+
+def add_lag_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Fügt erweiterte Lag-Features hinzu"""
+    if not CONFIG["features"]["use_lags"]:
+        return df
+        
+    df = df.copy()
+    
+    # Erweiterte Lag-Perioden (in 10-Minuten-Intervallen)
+    lag_configs = {
+        "y_lag_1h": 6,      # 1 Stunde = 6 * 10min
+        "y_lag_4h": 24,     # 4 Stunden = 24 * 10min
+        "y_lag_1d": 144,    # 1 Tag = 144 * 10min
+        "y_lag_7d": 1008,   # 7 Tage = 1008 * 10min (wie vorher)
+    }
+    
+    for lag_name, periods in lag_configs.items():
+        df[lag_name] = df["y"].shift(periods)
+        
+    return df
+
+def add_rolling_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Fügt Rolling-Window-Features hinzu"""
+    if not CONFIG["features"]["use_rolling"]:
+        return df
+        
+    df = df.copy()
+    
+    # Rolling Window Konfigurationen
+    windows = {
+        "1h": 6,
+        "4h": 24,
+        "12h": 72,
+    }
+    
+    for window_name, periods in windows.items():
+        # Rolling-Statistiken mit min_periods=1 für robuste Berechnung
+        df[f"y_rolling_mean_{window_name}"] = df["y"].rolling(periods, min_periods=1).mean()
+        df[f"y_rolling_std_{window_name}"] = df["y"].rolling(periods, min_periods=1).std()
+        df[f"y_rolling_max_{window_name}"] = df["y"].rolling(periods, min_periods=1).max()
+        df[f"y_rolling_min_{window_name}"] = df["y"].rolling(periods, min_periods=1).min()
+        
+    return df
+
+def add_trend_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Fügt Trend-Features hinzu"""
+    if not CONFIG["features"]["use_trends"]:
+        return df
+        
+    df = df.copy()
+    
+    # Trend-Features (absolute Differenzen)
+    df["y_diff_1h"] = df["y"] - df["y"].shift(6)    # Änderung vs. vor 1h
+    df["y_diff_4h"] = df["y"] - df["y"].shift(24)   # Änderung vs. vor 4h
+    df["y_diff_1d"] = df["y"] - df["y"].shift(144)  # Änderung vs. vor 1 Tag
+    
+    # Prozentuale Änderungen (robuster gegen absolute Werte)
+    df["y_pct_change_1h"] = df["y"].pct_change(6)   # % Änderung vs. vor 1h
+    df["y_pct_change_4h"] = df["y"].pct_change(24)  # % Änderung vs. vor 4h
+    df["y_pct_change_1d"] = df["y"].pct_change(144) # % Änderung vs. vor 1 Tag
+    
+    # Trend-Richtung (kategorisch)
+    df["trend_direction_1h"] = np.where(df["y_diff_1h"] > 0, 1, 
+                                       np.where(df["y_diff_1h"] < 0, -1, 0))
+    df["trend_direction_4h"] = np.where(df["y_diff_4h"] > 0, 1, 
+                                       np.where(df["y_diff_4h"] < 0, -1, 0))
+    
+    # Trend-Stärke (absolute prozentuale Änderung)
+    df["trend_strength_1h"] = np.abs(df["y_pct_change_1h"])
+    df["trend_strength_4h"] = np.abs(df["y_pct_change_4h"])
+    
     return df
 
 def fill_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+    """Erweiterte Behandlung fehlender Werte"""
+    # Alle numerischen Spalten außer dem Ziel
     num_cols = df.select_dtypes(include=[np.number]).columns.difference(["y"])
+    
+    # Interpolation für kontinuierliche Features
     df[num_cols] = df[num_cols].interpolate(method="linear").bfill().ffill()
+    
+    # Spezielle Behandlung für Trend-Features (NaN durch 0 ersetzen ist sinnvoll)
+    trend_cols = [col for col in df.columns if col.startswith(("y_diff_", "y_pct_", "trend_"))]
+    df[trend_cols] = df[trend_cols].fillna(0)
+    
     return df
 
 def make_future_df(day: datetime.date, tz) -> pd.DataFrame:
+    """Erstellt Future DataFrame mit allen Features"""
     open_str, close_str = CONFIG["working_hours"][day.strftime("%a")].split("-")
     open_dt = tz.localize(datetime.combine(day, datetime.strptime(open_str, "%H:%M").time()))
     close_dt = tz.localize(datetime.combine(day, datetime.strptime(close_str, "%H:%M").time()))
     future_times = pd.date_range(start=open_dt, end=close_dt, freq="10min", tz=tz.zone).tz_localize(None)
     fdf = pd.DataFrame({"ds": future_times})
-    return add_time_features(fdf)
+    
+    # Basis Zeit-Features hinzufügen
+    fdf = add_time_features(fdf)
+    
+    return fdf
 
 def get_feature_cols() -> List[str]:
-    base = ["sin_time", "cos_time", "sin_dow", "cos_dow", "is_holiday"]
+    """Erweiterte Feature-Liste"""
+    # Basis-Features
+    base = [
+        "sin_time", "cos_time", "sin_dow", "cos_dow", "is_holiday",
+        "is_weekend", "is_monday", "is_friday",
+        "is_early_morning", "is_morning", "is_lunch", 
+        "is_afternoon", "is_evening", "is_late"
+    ]
+    
     if CONFIG["features"]["use_bridge_day"]:
         base.append("is_bridge_day")
+        
     if CONFIG["features"]["use_temperature"]:
         base.append("temp_feels_like")
+        
     if CONFIG["features"]["use_lags"]:
-        base.append("y_lag_7d")
+        base.extend([
+            "y_lag_1h", "y_lag_4h", "y_lag_1d", "y_lag_7d"
+        ])
+        
+    if CONFIG["features"]["use_rolling"]:
+        base.extend([
+            "y_rolling_mean_1h", "y_rolling_std_1h", "y_rolling_max_1h", "y_rolling_min_1h",
+            "y_rolling_mean_4h", "y_rolling_std_4h", "y_rolling_max_4h", "y_rolling_min_4h",
+            "y_rolling_mean_12h", "y_rolling_std_12h", "y_rolling_max_12h", "y_rolling_min_12h"
+        ])
+        
+    if CONFIG["features"]["use_trends"]:
+        base.extend([
+            "y_diff_1h", "y_diff_4h", "y_diff_1d",
+            "y_pct_change_1h", "y_pct_change_4h", "y_pct_change_1d",
+            "trend_direction_1h", "trend_direction_4h",
+            "trend_strength_1h", "trend_strength_4h"
+        ])
+        
     return base
 
 def train_and_predict(target_date: datetime):
+    """Erweiterte Training und Prediction Funktion"""
     tz = pytz.timezone(CONFIG["tz"])
 
     # 1) Daten holen
+    print("📥 Lade Auslastungsdaten...")
     df = influx_query(CONFIG["query"]).rename(columns={"value": "y"})
+    
     if CONFIG["features"]["use_temperature"]:
+        print("🌡️ Lade Temperaturdaten...")
         temp = influx_query(CONFIG["temp_query"]).rename(columns={"value": "temp_feels_like"})
         df = pd.merge(df, temp, on="ds", how="left")
+    
+    print(f"📊 Dataset: {len(df)} Datenpunkte")
+    
+    # 2) Features hinzufügen
+    print("🔧 Erstelle Features...")
     df = add_time_features(df).sort_values("ds")
-
-    if CONFIG["features"]["use_lags"]:
-        df["y_lag_7d"] = df["y"].shift(1008)
-
+    df = add_lag_features(df)
+    df = add_rolling_features(df)
+    df = add_trend_features(df)
+    
+    # 3) Fehlende Werte behandeln
     df = fill_missing_values(df)
 
+    # 4) Feature-Spalten bestimmen
     feature_cols = get_feature_cols()
-    df_train = df[feature_cols + ["y"]]
+    print(f"📈 Verwende {len(feature_cols)} Features: {feature_cols[:5]}..." + 
+          (f" und {len(feature_cols)-5} weitere" if len(feature_cols) > 5 else ""))
+    
+    # 5) Training-Daten vorbereiten (nur Zeilen ohne NaN in Features)
+    df_train = df[feature_cols + ["y"]].dropna()
+    print(f"🎯 Training mit {len(df_train)} sauberen Datenpunkten")
+    
+    if len(df_train) < 100:
+        print("⚠️ Warnung: Wenig Trainingsdaten verfügbar!")
 
-    model = LGBMRegressor(**CONFIG["model_params"]).fit(df_train[feature_cols], df_train["y"])
+    # 6) Modell trainieren
+    print("🤖 Trainiere LightGBM Modell...")
+    model = LGBMRegressor(**CONFIG["model_params"], verbose=-1)
+    model.fit(df_train[feature_cols], df_train["y"])
 
+    # 7) Future DataFrame erstellen
+    print(f"🔮 Erstelle Prognosen für {target_date.date()}...")
     future_df = make_future_df(target_date.date(), tz)
+    
+    # 8) Fehlende Features für Future DataFrame setzen
+    # Temperature (falls aktiviert, aber in Zukunft unbekannt)
     if CONFIG["features"]["use_temperature"]:
-        future_df["temp_feels_like"] = np.nan
+        future_df["temp_feels_like"] = np.nan  # Wird interpoliert/gefüllt
+    
+    # Lag-Features (in Zukunft unbekannt)
     if CONFIG["features"]["use_lags"]:
-        future_df["y_lag_7d"] = np.nan
+        for lag_col in ["y_lag_1h", "y_lag_4h", "y_lag_1d", "y_lag_7d"]:
+            future_df[lag_col] = np.nan
+    
+    # Rolling-Features (in Zukunft unbekannt)
+    if CONFIG["features"]["use_rolling"]:
+        rolling_cols = [col for col in feature_cols if col.startswith("y_rolling_")]
+        for col in rolling_cols:
+            future_df[col] = np.nan
+    
+    # Trend-Features (in Zukunft unbekannt)
+    if CONFIG["features"]["use_trends"]:
+        trend_cols = [col for col in feature_cols if col.startswith(("y_diff_", "y_pct_", "trend_"))]
+        for col in trend_cols:
+            future_df[col] = np.nan
+    
+    # 9) Fehlende Werte in Future DataFrame behandeln
+    future_df = fill_missing_values(future_df)
 
+    # 10) Vorhersagen machen
     future_df["y_pred"] = model.predict(future_df[feature_cols])
+    
+    print(f"✅ {len(future_df)} Prognosen erstellt")
+    print(f"📊 Prognose-Bereich: {future_df['y_pred'].min():.1f} - {future_df['y_pred'].max():.1f}")
+    
     return future_df[["ds", "y_pred"]]
 
 def write_forecast_to_influx(df: pd.DataFrame):
+    """Schreibt Prognosen in InfluxDB"""
     client = InfluxDBClient(
         host=CONFIG["influx_host"],
         port=CONFIG.get("influx_port", 8086),
@@ -218,8 +407,10 @@ def main():
     tz = pytz.timezone(CONFIG["tz"])
     target_dt = tz.localize(datetime.strptime(args.date, "%Y-%m-%d")) if args.date else datetime.now(tz)
 
+    print(f"🚀 Starte Forecast für {target_dt.date()}")
     forecast_df = train_and_predict(target_dt)
     write_forecast_to_influx(forecast_df)
+    print("🎉 Forecast abgeschlossen!")
 
 if __name__ == "__main__":
     main()
