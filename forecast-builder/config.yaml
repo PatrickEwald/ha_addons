@@ -1,7 +1,7 @@
 name: Forecast Builder
-version: "1.0.4"
+version: "1.0.5"
 slug: forecast_builder
-description: Alle 5 Minuten aktuelle Daten abholen, Auslastung prognostizieren und in InfluxDB speichern
+description: Alle 15 Minuten aktuelle Daten abholen, Auslastung prognostizieren und in InfluxDB speichern
 url: "https://github.com/PatrickEwald/ha_addons/tree/main/forecast-builder"
 init: false
 startup: application
@@ -16,6 +16,8 @@ options:
   use_temperature: false
   use_bridge_day: false
   use_lags: false
+  use_rolling: false
+  use_trends: false
   influx_user: ""
   influx_password: ""
   interval: 300 # Sekunden; Standard = 15 min
@@ -23,6 +25,8 @@ schema:
   use_temperature: "bool"
   use_bridge_day: "bool"
   use_lags: "bool"
+  use_rolling: "bool"
+  use_trends: "bool"
   influx_user: "str"
   influx_password: "str"
   interval: int
