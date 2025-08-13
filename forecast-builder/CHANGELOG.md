@@ -30,3 +30,9 @@
 ### Behoben
 
 - refactor(forecast-runner): improve interval handling and logging
+
+## [1.0.5] - 2025-08-13
+
+### Hinzugefügt
+
+- add new features
