@@ -11,7 +11,7 @@ Keine Plots, CSVs, MQTT oder SHAP-Analysen mehr.
 """
 
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 import json
 import os
@@ -407,15 +407,22 @@ def write_forecast_to_influx(df: pd.DataFrame):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--date", type=str, help="YYYY-MM-DD (Default=today)")
+    parser.add_argument("--horizon", type=int, default=2, help="Anzahl Tage ab Startdatum (Default=2 = heute & morgen)")
     args = parser.parse_args()
 
     tz = pytz.timezone(CONFIG["tz"])
     target_dt = tz.localize(datetime.strptime(args.date, "%Y-%m-%d")) if args.date else datetime.now(tz)
 
-    print(f"🚀 Starte Forecast für {target_dt.date()}")
-    forecast_df = train_and_predict(target_dt)
-    write_forecast_to_influx(forecast_df)
-    print("🎉 Forecast abgeschlossen!")
+    all_forecasts = []
+    for d in range(max(1, args.horizon)):
+        day_dt = target_dt + timedelta(days=d)
+        print(f"🚀 Starte Forecast für {day_dt.date()}")
+        fd = train_and_predict(day_dt)
+        all_forecasts.append(fd)
+
+    merged = pd.concat(all_forecasts, ignore_index=True).sort_values("ds") if all_forecasts else pd.DataFrame(columns=["ds","y_pred"])
+    write_forecast_to_influx(merged)
+    print("🎉 Forecast abgeschlossen – geschrieben: heute & Folge-Tage gemäß --horizon.")
 
 if __name__ == "__main__":
     main()

@@ -1,5 +1,5 @@
 name: Forecast Builder
-version: "1.0.6"
+version: "1.0.7"
 slug: forecast_builder
 description: Alle 15 Minuten aktuelle Daten abholen, Auslastung prognostizieren und in InfluxDB speichern
 url: "https://github.com/PatrickEwald/ha_addons/tree/main/forecast-builder"
