@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fff_postgres
+    environment:
+      POSTGRES_DB: ffdb
+      POSTGRES_USER: ffuser
+      POSTGRES_PASSWORD: ffpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ffuser -d ffdb"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  fastapi:
+    build:
+      context: ./fastapi
+      dockerfile: ../Dockerfile.fastapi
+    container_name: fff_fastapi
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ffdb
+      POSTGRES_USER: ffuser
+      POSTGRES_PASSWORD: ffpass
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+
+  airflow:
+    build:
+      context: ./airflow
+      dockerfile: ../Dockerfile.airflow
+    container_name: fff_airflow
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ffdb
+      POSTGRES_USER: ffuser
+      POSTGRES_PASSWORD: ffpass
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql://ffuser:ffpass@postgres:5432/ffdb
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./airflow/dags:/app/dags
+      - airflow_data:/app/airflow
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: fff_dashboard
+    ports:
+      - "3003:3003"
+    restart: unless-stopped
+    volumes:
+      - ./dashboard:/app/dashboard
+
+volumes:
+  postgres_data:
+  data:
+  airflow_data:

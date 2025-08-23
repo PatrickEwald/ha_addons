@@ -1,0 +1,56 @@
+name: "FFF Fitness Dashboard"
+version: "1.0.0"
+slug: "fff-fitness-dashboard"
+description: "Fitness Studio Auslastungs-Dashboard mit ML-Vorhersagen"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: application
+init: false
+ports:
+  "{{ dashboard_port }}/tcp": "{{ dashboard_port }}"
+  "{{ fastapi_port }}/tcp": "{{ fastapi_port }}"
+  "{{ airflow_port }}/tcp": "{{ airflow_port }}"
+ports_description:
+  "{{ dashboard_port }}/tcp": "Dashboard Frontend"
+  "{{ fastapi_port }}/tcp": "FastAPI Backend"
+  "{{ airflow_port }}/tcp": "Airflow Web UI"
+environment:
+  POSTGRES_HOST: "postgres"
+  POSTGRES_DB: "ffdb"
+  POSTGRES_USER: "ffuser"
+  POSTGRES_PASSWORD: "ffpass"
+  AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql://ffuser:ffpass@postgres:5432/ffdb"
+volumes:
+  - "data:/data"
+  - "postgres_data:/var/lib/postgresql/data"
+  - "airflow_data:/app/airflow"
+schema:
+  dashboard_port:
+    - int
+  fastapi_port:
+    - int
+  airflow_port:
+    - int
+  postgres_host:
+    - str
+  postgres_db:
+    - str
+  postgres_user:
+    - str
+  postgres_password:
+    - str
+  airflow_sql_connection:
+    - str
+options:
+  dashboard_port: 3003
+  fastapi_port: 8001
+  airflow_port: 8081
+  postgres_host: "postgres"
+  postgres_db: "ffdb"
+  postgres_user: "ffuser"
+  postgres_password: "ffpass"
+  airflow_sql_connection: "postgresql://ffuser:ffpass@postgres:5432/ffdb"
