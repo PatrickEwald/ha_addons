@@ -31,8 +31,8 @@ import holidays
 # ────────────────────────────────────
 CONFIG = {
     # Influx — Datenquelle
-    "influx_host": "192.168.0.123",
-    "influx_url": "http://192.168.0.123:8086/query",
+    "influx_host": "192.168.0.205",
+    "influx_url": "http://192.168.0.205:8086/query",
     "influx_db": "homeassistant",
     "influx_auth": (None, None),  # kein Default mehr, muss geladen werden
     # Queries
